@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(RealisticVehicleCallSystem LANGUAGES CXX)
+
+add_compile_definitions(NOMINMAX)
+add_subdirectory(vendor/RedLib)
+cmake_policy(SET CMP0079 NEW)
+
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+
+add_subdirectory(deps/red4ext.sdk)
+set_target_properties(RED4ext.SDK PROPERTIES FOLDER "Dependencies")
+
+mark_as_advanced(
+        RED4EXT_BUILD_EXAMPLES
+        RED4EXT_HEADER_ONLY
+)
+
+set(CMAKE_GENERATOR_PLATFORM x64)
+
+add_subdirectory(src)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE RedLib)
