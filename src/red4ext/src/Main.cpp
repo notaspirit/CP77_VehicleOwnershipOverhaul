@@ -1,5 +1,7 @@
 #include <RED4ext/RED4ext.hpp>
-#include <RealisticVehicleCallSystem.h>
+#include <RealisticVehicleCallSystemNative.h>
+
+#include "RedLogger.h"
 #include "DataStructs/Globals.h"
 
 namespace RealisticVehicleCallSystem
@@ -7,24 +9,27 @@ namespace RealisticVehicleCallSystem
     RED4ext::PluginHandle g_pHandle;
     const RED4ext::Sdk* g_sdk;
 
-    RED4ext::TTypedClass<RealisticVehicleCallSystem> customControllerClass(
+    RED4ext::TTypedClass<RealisticVehicleCallSystemNative> customControllerClass(
     "RealisticVehicleCallSystemNative");
 
-    RED4ext::CClass* RealisticVehicleCallSystem::GetNativeType()
+    RED4ext::CClass* RealisticVehicleCallSystemNative::GetNativeType()
     {
         return &customControllerClass;
     }
 
     RED4EXT_C_EXPORT void RED4EXT_CALL RegisterTypes()
     {
+        /*
         RED4ext::CNamePool::Add("RealisticVehicleCallSystemNative");
 
         customControllerClass.flags = {.isNative = true};
         RED4ext::CRTTISystem::Get()->RegisterType(&customControllerClass);
+        */
     }
 
     RED4EXT_C_EXPORT void RED4EXT_CALL PostRegisterTypes()
     {
+        /*
         const auto rtti = RED4ext::CRTTISystem::Get();
         const auto scriptable = rtti->GetClass("IScriptable");
         customControllerClass.parent = scriptable;
@@ -35,6 +40,7 @@ namespace RealisticVehicleCallSystem
 
         onGeoCachePostLoad->AddParam("handle:physicsGeometryCache", "geoCache");
         customControllerClass.RegisterFunction(onGeoCachePostLoad);
+        */
 
     }
 
@@ -47,10 +53,18 @@ namespace RealisticVehicleCallSystem
                 g_pHandle = aHandle;
                 g_sdk = aSdk;
 
+                /*
+
                 RED4ext::CRTTISystem::Get()->AddRegisterCallback(RegisterTypes);
                 RED4ext::CRTTISystem::Get()->AddPostRegisterCallback(PostRegisterTypes);
 
                 g_sdk->logger->Info(g_pHandle, "UnlimitedGeometryCacheStreamingNative loaded");
+
+                */
+
+                RealisticVehicleCallSystemNative::Hook();
+
+                RedLogger::Info("RealisticVehicleCallSystem loaded");
                 break;
             }
             case RED4ext::EMainReason::Unload:
@@ -64,7 +78,7 @@ namespace RealisticVehicleCallSystem
 
     RED4EXT_C_EXPORT void RED4EXT_CALL Query(RED4ext::PluginInfo* aInfo)
     {
-        aInfo->name = L"UnlimitedGeometryCacheStreamingNative";
+        aInfo->name = L"RealisticVehicleCallSystem";
         aInfo->author = L"sprt_";
         aInfo->version = RED4EXT_SEMVER(1, 0, 0);
         aInfo->runtime = RED4EXT_RUNTIME_INDEPENDENT;

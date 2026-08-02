@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 4.0)
 
-project(RealisticVehicleCallSystem LANGUAGES CXX)
+project(RealisticVehicleCallSystem LANGUAGES C CXX)
 
 add_compile_definitions(NOMINMAX)
 add_subdirectory(vendor/RedLib)
@@ -14,6 +14,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 add_subdirectory(deps/red4ext.sdk)
 set_target_properties(RED4ext.SDK PROPERTIES FOLDER "Dependencies")
+
+add_library(MinHook STATIC
+        vendor/MinHook/src/buffer.c
+        vendor/MinHook/src/hook.c
+        vendor/MinHook/src/trampoline.c
+        vendor/MinHook/src/hde/hde32.c
+        vendor/MinHook/src/hde/hde64.c
+)
+
+target_include_directories(MinHook PUBLIC vendor/MinHook/include)
 
 mark_as_advanced(
         RED4EXT_BUILD_EXAMPLES

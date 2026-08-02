@@ -7,11 +7,12 @@
 namespace RealisticVehicleCallSystem
 {
 
-class RealisticVehicleCallSystem : RED4ext::IScriptable
+class RealisticVehicleCallSystemNative : RED4ext::IScriptable
 {
 public:
-    static void OnGeoCachePostLoad(RED4ext::IScriptable* aContext, RED4ext::CStackFrame* aFrame, RED4ext::CString* aOut,
-                          int64_t a4);
+    static void Hook();
+    static char __fastcall hkFindSpawnLocation(int64_t param_1, float* param_2, float* param_3, void* param_4);
+
     RED4ext::CClass* GetNativeType();
 };
 
