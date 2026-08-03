@@ -5,6 +5,7 @@
 #include "../vendor/MinHook/include/MinHook.h"
 #include "DataStructs/Addresses.h"
 #include "DataStructs/Globals.h"
+#include "RED4ext/Scripting/Natives/Generated/game/TransactionSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/Vehicle_Record.hpp"
@@ -108,6 +109,8 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
         RedLogger::Info("Display name is: " + std::string(locText.c_str()));
     }
 
+    TransactMoney(-1000);
+
     return result;
 }
 
@@ -118,6 +121,18 @@ RED4ext::TweakDBID* RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive(RED4
     auto stringId = std::to_string(base->name.hash) + std::string(name);
     RecordHashFlatNameIDMap[stringId] = *id;
     return result;
+}
+
+// based on CETs AddItemToInventory under MIT
+void RealisticVehicleCallSystemNative::TransactMoney(int quantity)
+{
+    RED4ext::ScriptGameInstance gameInstance;
+    RED4ext::Handle<RED4ext::IScriptable> player;
+    RED4ext::ExecuteGlobalFunction("GetPlayer;GameInstance", &player, gameInstance);
+
+    bool result;
+    RED4ext::TweakDBID itemID("Items.money");
+    RED4ext::ExecuteFunction("gameTransactionSystem", "GiveItemByTDBID", &result, player, itemID, quantity);
 }
 
 void RealisticVehicleCallSystemNative::SetSpawnPoint(

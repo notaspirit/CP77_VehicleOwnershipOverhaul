@@ -18,6 +18,7 @@ public:
     static char __fastcall hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, float* playerPosition, float* outPosition, float* playerAndOutRotation);
     static bool __fastcall hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem* vehicleSystem, RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad);
     static RED4ext::TweakDBID* __fastcall hkTweakDBIdCtorDerive(RED4ext::TweakDBID* base, RED4ext::TweakDBID* id, const char* name);
+    static void TransactMoney(int quantity);
     static void SetSpawnPoint(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
 
     RED4ext::CClass* GetNativeType();
