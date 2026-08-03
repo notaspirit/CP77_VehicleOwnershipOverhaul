@@ -39,6 +39,14 @@ namespace RealisticVehicleCallSystem
         setSpawnPoint->AddParam("Vector4", "position");
         setSpawnPoint->AddParam("Quaternion", "rotation");
         customControllerClass.RegisterFunction(setSpawnPoint);
+
+        const auto showSimpleScreenMessage =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "ShowSimpleScreenMessage", "ShowSimpleScreenMessage",
+            &RealisticVehicleCallSystemNative::ShowSimpleScreenMessage, {.isNative = true, .isStatic = true});
+
+        showSimpleScreenMessage->AddParam("gameSimpleScreenMessage", "message");
+
+        customControllerClass.RegisterFunction(showSimpleScreenMessage);
     }
 
     RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason, const RED4ext::Sdk* aSdk)

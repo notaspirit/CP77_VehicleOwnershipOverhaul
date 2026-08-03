@@ -5,10 +5,11 @@
 #include "../vendor/MinHook/include/MinHook.h"
 #include "DataStructs/Addresses.h"
 #include "DataStructs/Globals.h"
+#include "RED4ext/Scripting/Natives/Generated/game/SimpleScreenMessage.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/TransactionSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
+#include "RED4ext/Scripting/Natives/Generated/game/bb/AllScriptDefinitions.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
-#include "RED4ext/Scripting/Natives/Generated/game/data/Vehicle_Record.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
 
 namespace RealisticVehicleCallSystem
@@ -107,9 +108,22 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
         RED4ext::ExecuteGlobalFunction("GetLocalizedTextByKey", &locText, locKey->primaryKey);
 
         RedLogger::Info("Display name is: " + std::string(locText.c_str()));
-    }
 
-    TransactMoney(-1000);
+        TransactMoney(-1000);
+
+        RED4ext::CString logMessage = "Vehicle Delivery";
+        RED4ext::ExecuteFunction("gameActivityLogSystem", "AddLog", nullptr, logMessage);
+
+
+        RED4ext::SimpleScreenMessage message = { };
+        message.isShown = true;
+        message.duration = 5.0f;
+        message.isInstant = true;
+        message.message = "Delivered " + std::string(locText.c_str());
+        message.type = RED4ext::SimpleMessageType::Neutral;
+
+        RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
+    }
 
     return result;
 }
@@ -151,6 +165,17 @@ void RealisticVehicleCallSystemNative::SetSpawnPoint(
     spawnRotation = rotation;
 }
 
+void RealisticVehicleCallSystemNative::ShowSimpleScreenMessage(
+    RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame,
+    RED4ext::CString *aOut,
+    int64_t a4)
+{
+    RED4ext::SimpleScreenMessage message {};
+    RED4ext::GetParameter(aFrame, &message);
+    aFrame->code++;
 
+    // do nothing, CET script will observe method call and post message
+}
 }
 

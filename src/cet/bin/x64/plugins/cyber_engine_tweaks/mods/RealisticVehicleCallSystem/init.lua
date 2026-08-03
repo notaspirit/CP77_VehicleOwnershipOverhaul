@@ -1,5 +1,11 @@
 local isOverlayVisible = false
 
+registerForEvent('onInit', function()
+    ObserveAfter('RealisticVehicleCallSystemNative', 'ShowSimpleScreenMessage', function(message)
+        GameInstance.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(message), true)
+    end)
+end)
+
 registerForEvent('onOverlayOpen', function()
     isOverlayVisible = true
 end)
