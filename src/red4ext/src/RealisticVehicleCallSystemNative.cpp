@@ -7,10 +7,13 @@
 #include "DataStructs/Globals.h"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
+#include "RED4ext/Scripting/Natives/Generated/game/data/Vehicle_Record.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
 
 namespace RealisticVehicleCallSystem
 {
+
+std::unordered_map<std::string, RED4ext::TweakDBID> RecordHashFlatNameIDMap;
 
 RED4ext::Vector4 spawnPosition = RED4ext::Vector4(0.0f, 0.0f, 0.0f, 0.0f);
 RED4ext::Quaternion spawnRotation = RED4ext::Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
@@ -20,6 +23,9 @@ FindSpawnLocation_t oFindSpawnLocation = nullptr;
 
 typedef bool (__fastcall* SpawnPlayerVehicle_t)(RED4ext::gameVehicleSystem*, RED4ext::gamedataVehicleType, RED4ext::TweakDBID, bool);
 SpawnPlayerVehicle_t oSpawnPlayerVehicle = nullptr;
+
+typedef RED4ext::TweakDBID* (__fastcall* TweakDBIdCtorDerive_t)(RED4ext::TweakDBID*, RED4ext::TweakDBID*, const char*);
+TweakDBIdCtorDerive_t oTweakDBIdCtorDerive = nullptr;
 
 void RealisticVehicleCallSystemNative::Hook()
 {
@@ -31,11 +37,18 @@ void RealisticVehicleCallSystemNative::Hook()
     void* findSpawnLocationAddress = (void*)(base + 0x25e64fc);
     void* spawnPlayerVehicleAddress = (void*)(base + 0x1ccec50);
 
+    const RED4ext::UniversalRelocPtr<uint8_t> TweakDBIdConstructorMethod(Addresses::CScript_TDBIDConstructorDerive);
+    uint8_t* TweakDBIdConstructorAddress = TweakDBIdConstructorMethod.GetAddr();
+
     MH_CreateHook(findSpawnLocationAddress, &RealisticVehicleCallSystemNative::hkFindSpawnLocation, reinterpret_cast<void**>(&oFindSpawnLocation));
     MH_EnableHook(findSpawnLocationAddress);
 
     MH_CreateHook(spawnPlayerVehicleAddress, &RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle, reinterpret_cast<void**>(&oSpawnPlayerVehicle));
     MH_EnableHook(spawnPlayerVehicleAddress);
+
+    MH_CreateHook(TweakDBIdConstructorAddress, &RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive, reinterpret_cast<void**>(&oTweakDBIdCtorDerive));
+    MH_EnableHook(TweakDBIdConstructorAddress);
+
 
     RedLogger::Info("Finished Hooking");
 }
@@ -75,6 +88,35 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
 
     RedLogger::Info(buf);
 
+    auto tdb = RED4ext::TweakDB::Get();
+
+    auto displayNameFlatName =  std::to_string(vehicleID.name.hash) + ".displayName";
+    auto displayNameFlatId = RecordHashFlatNameIDMap.find(displayNameFlatName);
+
+    if (displayNameFlatId == RecordHashFlatNameIDMap.end())
+        RedLogger::Warning("Could not find flat for " + displayNameFlatName);
+    else
+    {
+        auto displayNameFlat = tdb->GetFlatValue(displayNameFlatId->second);
+        auto locKey = displayNameFlat->GetValue<RED4ext::gamedataLocKeyWrapper>();
+
+        RedLogger::Info("LocKey for display name is: " + std::to_string(locKey->primaryKey));
+
+        RED4ext::CString locText;
+        RED4ext::ExecuteGlobalFunction("GetLocalizedTextByKey", &locText, locKey->primaryKey);
+
+        RedLogger::Info("Display name is: " + std::string(locText.c_str()));
+    }
+
+    return result;
+}
+
+RED4ext::TweakDBID* RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive(RED4ext::TweakDBID* base,
+    RED4ext::TweakDBID* id, const char* name)
+{
+    auto result = oTweakDBIdCtorDerive(base, id, name);
+    auto stringId = std::to_string(base->name.hash) + std::string(name);
+    RecordHashFlatNameIDMap[stringId] = *id;
     return result;
 }
 
