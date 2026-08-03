@@ -6,6 +6,7 @@
 #include "DataStructs/Addresses.h"
 #include "DataStructs/Globals.h"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
+#include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
 
 namespace RealisticVehicleCallSystem
@@ -17,6 +18,9 @@ RED4ext::Quaternion spawnRotation = RED4ext::Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
 typedef char (__fastcall* FindSpawnLocation_t)(RED4ext::gameVehicleSystem*, float*, float*, float*);
 FindSpawnLocation_t oFindSpawnLocation = nullptr;
 
+typedef bool (__fastcall* SpawnPlayerVehicle_t)(RED4ext::gameVehicleSystem*, RED4ext::gamedataVehicleType, RED4ext::TweakDBID, bool);
+SpawnPlayerVehicle_t oSpawnPlayerVehicle = nullptr;
+
 void RealisticVehicleCallSystemNative::Hook()
 {
     RedLogger::Info("Hooking VehicleSystem");
@@ -24,10 +28,14 @@ void RealisticVehicleCallSystemNative::Hook()
     MH_Initialize();
 
     uintptr_t base = (uintptr_t)GetModuleHandleA(nullptr);
-    void* target = (void*)(base + 0x25e64fc);
+    void* findSpawnLocationAddress = (void*)(base + 0x25e64fc);
+    void* spawnPlayerVehicleAddress = (void*)(base + 0x1ccec50);
 
-    MH_CreateHook(target, &RealisticVehicleCallSystemNative::hkFindSpawnLocation, reinterpret_cast<void**>(&oFindSpawnLocation));
-    MH_EnableHook(target);
+    MH_CreateHook(findSpawnLocationAddress, &RealisticVehicleCallSystemNative::hkFindSpawnLocation, reinterpret_cast<void**>(&oFindSpawnLocation));
+    MH_EnableHook(findSpawnLocationAddress);
+
+    MH_CreateHook(spawnPlayerVehicleAddress, &RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle, reinterpret_cast<void**>(&oSpawnPlayerVehicle));
+    MH_EnableHook(spawnPlayerVehicleAddress);
 
     RedLogger::Info("Finished Hooking");
 }
@@ -47,6 +55,29 @@ char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::g
     return 1;
 }
 
+bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem *vehicleSystem,
+    RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad)
+{
+    bool result = oSpawnPlayerVehicle(vehicleSystem, vehicleType, vehicleID, spawnOnlyOnValidRoad);
+
+    char buf[512];
+
+    snprintf(buf, sizeof(buf),
+        "[SpawnPlayerVehicle] result=%d\n"
+        "  vehicleType: %s\n"
+        "  vehicleID: %u\n"
+        "  spawnOnlyOnValidRoad: %d",
+        result,
+        ToString(vehicleType),
+        vehicleID.name.hash,
+        spawnOnlyOnValidRoad
+    );
+
+    RedLogger::Info(buf);
+
+    return result;
+}
+
 void RealisticVehicleCallSystemNative::SetSpawnPoint(
     RED4ext::IScriptable *aContext,
     RED4ext::CStackFrame *aFrame,
@@ -62,5 +93,7 @@ void RealisticVehicleCallSystemNative::SetSpawnPoint(
     spawnPosition = position;
     spawnRotation = rotation;
 }
+
+
 }
 
