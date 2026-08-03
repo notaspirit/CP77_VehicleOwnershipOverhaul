@@ -10,6 +10,10 @@
 
 namespace RealisticVehicleCallSystem
 {
+
+RED4ext::Vector4 spawnPosition = RED4ext::Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+RED4ext::Quaternion spawnRotation = RED4ext::Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+
 typedef char (__fastcall* FindSpawnLocation_t)(RED4ext::gameVehicleSystem*, float*, float*, float*);
 FindSpawnLocation_t oFindSpawnLocation = nullptr;
 
@@ -31,15 +35,32 @@ char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::g
 {
     oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
 
-    float myX = playerPosition[0], myY = playerPosition[1], myZ = playerPosition[2] + 20.0f;
-    outPosition[0] = myX; outPosition[1] = myY; outPosition[2] = myZ;
+    outPosition[0] = spawnPosition.X;
+    outPosition[1] = spawnPosition.Y;
+    outPosition[2] = spawnPosition.Z;
 
-    playerAndOutRotation[0] = 0.0f;
-    playerAndOutRotation[1] = 0.0f;
-    playerAndOutRotation[2] = 0.7071f;
-    playerAndOutRotation[3] = 0.7071f;
+    playerAndOutRotation[0] = spawnRotation.i;
+    playerAndOutRotation[1] = spawnRotation.j;
+    playerAndOutRotation[2] = spawnRotation.k;
+    playerAndOutRotation[3] = spawnRotation.r;
 
     return 1;
+}
+
+void RealisticVehicleCallSystemNative::SetSpawnPoint(
+    RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame,
+    RED4ext::CString *aOut,
+    int64_t a4)
+{
+    RED4ext::Vector4 position {};
+    RED4ext::Quaternion rotation {};
+    RED4ext::GetParameter(aFrame, &position);
+    RED4ext::GetParameter(aFrame, &rotation);
+    aFrame->code++;
+
+    spawnPosition = position;
+    spawnRotation = rotation;
 }
 }
 

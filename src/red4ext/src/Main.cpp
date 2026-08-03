@@ -19,29 +19,26 @@ namespace RealisticVehicleCallSystem
 
     RED4EXT_C_EXPORT void RED4EXT_CALL RegisterTypes()
     {
-        /*
         RED4ext::CNamePool::Add("RealisticVehicleCallSystemNative");
 
         customControllerClass.flags = {.isNative = true};
         RED4ext::CRTTISystem::Get()->RegisterType(&customControllerClass);
-        */
     }
 
     RED4EXT_C_EXPORT void RED4EXT_CALL PostRegisterTypes()
     {
-        /*
+
         const auto rtti = RED4ext::CRTTISystem::Get();
         const auto scriptable = rtti->GetClass("IScriptable");
         customControllerClass.parent = scriptable;
 
-        const auto onGeoCachePostLoad =
-            RED4ext::CClassStaticFunction::Create(&customControllerClass, "OnGeoCachePostLoad", "OnGeoCachePostLoad",
-            &RealisticVehicleCallSystem::OnGeoCachePostLoad, {.isNative = true, .isStatic = true});
+        const auto setSpawnPoint =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "SetSpawnPoint", "SetSpawnPoint",
+            &RealisticVehicleCallSystemNative::SetSpawnPoint, {.isNative = true, .isStatic = true});
 
-        onGeoCachePostLoad->AddParam("handle:physicsGeometryCache", "geoCache");
-        customControllerClass.RegisterFunction(onGeoCachePostLoad);
-        */
-
+        setSpawnPoint->AddParam("Vector4", "position");
+        setSpawnPoint->AddParam("Quaternion", "rotation");
+        customControllerClass.RegisterFunction(setSpawnPoint);
     }
 
     RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason, const RED4ext::Sdk* aSdk)
@@ -53,14 +50,8 @@ namespace RealisticVehicleCallSystem
                 g_pHandle = aHandle;
                 g_sdk = aSdk;
 
-                /*
-
                 RED4ext::CRTTISystem::Get()->AddRegisterCallback(RegisterTypes);
                 RED4ext::CRTTISystem::Get()->AddPostRegisterCallback(PostRegisterTypes);
-
-                g_sdk->logger->Info(g_pHandle, "UnlimitedGeometryCacheStreamingNative loaded");
-
-                */
 
                 RealisticVehicleCallSystemNative::Hook();
 
