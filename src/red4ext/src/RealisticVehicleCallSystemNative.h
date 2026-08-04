@@ -15,13 +15,14 @@ class RealisticVehicleCallSystemNative : RED4ext::IScriptable
 {
 public:
     static void Hook();
-    static char __fastcall hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, float* playerPosition, float* outPosition, float* playerAndOutRotation);
+    static char __fastcall hkFindSpawnLocation(RED4ext::gameVehicleSystem *vehicleSystem, RED4ext::Vector3 *playerPosition, RED4ext::Vector3 *outPosition, RED4ext::
+                                               Quaternion *playerAndOutRotation);
     static bool __fastcall hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem* vehicleSystem, RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad);
     static RED4ext::TweakDBID* __fastcall hkTweakDBIdCtorDerive(RED4ext::TweakDBID* base, RED4ext::TweakDBID* id, const char* name);
     static void TransactMoney(int quantity);
 
-    static bool FindDeliveryPosition(RED4ext::Vector3 &playerPosition, RED4ext::gamedataVehicleType vehicleType,
-                                     RED4ext::TweakDBID vehicleId, RED4ext::Vector3 &outPosition, RED4ext::Quaternion &outRotation);
+    static bool FindDeliveryPosition(RED4ext::Vector3 *playerPosition, RED4ext::gamedataVehicleType vehicleType,
+                                     RED4ext::TweakDBID vehicleId, RED4ext::Vector3 *outPosition, RED4ext::Quaternion *outRotation);
 
     static void SetSpawnPoint(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
     static void ShowSimpleScreenMessage(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);

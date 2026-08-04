@@ -28,7 +28,7 @@ std::unordered_map<std::string, RED4ext::TweakDBID> RecordHashFlatNameIDMap;
 RED4ext::Vector4 spawnPosition = RED4ext::Vector4(0.0f, 0.0f, 0.0f, 0.0f);
 RED4ext::Quaternion spawnRotation = RED4ext::Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
 
-typedef char (__fastcall* FindSpawnLocation_t)(RED4ext::gameVehicleSystem*, float*, float*, float*);
+typedef char (__fastcall* FindSpawnLocation_t)(RED4ext::gameVehicleSystem*, RED4ext::Vector3*, RED4ext::Vector3*, RED4ext::Quaternion*);
 FindSpawnLocation_t oFindSpawnLocation = nullptr;
 
 typedef bool (__fastcall* SpawnPlayerVehicle_t)(RED4ext::gameVehicleSystem*, RED4ext::gamedataVehicleType, RED4ext::TweakDBID, bool);
@@ -62,34 +62,19 @@ void RealisticVehicleCallSystemNative::Hook()
 
     RedLogger::Info("Finished Hooking");
 }
-char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, float* playerPosition, float* outPosition, float* playerAndOutRotation)
+char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, RED4ext::Vector3* playerPosition, RED4ext::Vector3* outPosition, RED4ext::Quaternion* playerAndOutRotation)
 {
     char oResult = oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
 
-    RED4ext::Vector3 playerPosition3D(playerPosition[0], playerPosition[1], playerPosition[2]);
-    RED4ext::Vector3 outPosition3D;
-    RED4ext::Quaternion outRotation3D;
-
     RedLogger::Info("Finished calling original findSpawnLocation method, setup variables for own method");
 
-    if (!FindDeliveryPosition(playerPosition3D, currentVehicleType, currentVehicleID, outPosition3D, outRotation3D))
+    if (!FindDeliveryPosition(playerPosition, currentVehicleType, currentVehicleID, outPosition, playerAndOutRotation))
     {
         RedLogger::Info("Finished FindDeliveryPosition with result false");
         return oResult;
     }
 
     RedLogger::Info("Finished FindDeliveryPosition with result true");
-
-    outPosition[0] = outPosition3D.X;
-    outPosition[1] = outPosition3D.Y;
-    outPosition[2] = outPosition3D.Z;
-
-    playerAndOutRotation[0] = outRotation3D.i;
-    playerAndOutRotation[1] = outRotation3D.j;
-    playerAndOutRotation[2] = outRotation3D.k;
-    playerAndOutRotation[3] = outRotation3D.r;
-
-    RedLogger::Info("Set out variables, returning 1");
 
     return 1;
 }
@@ -213,11 +198,11 @@ bool SlotSupports(const RealisticVehicleSystem::Slot& slot, const RED4ext::gamed
     return true;
 }
 
-bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3& playerPosition,
+bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* playerPosition,
     const RED4ext::gamedataVehicleType vehicleType,
     const RED4ext::TweakDBID vehicleId,
-    RED4ext::Vector3& outPosition,
-    RED4ext::Quaternion& outRotation)
+    RED4ext::Vector3* outPosition,
+    RED4ext::Quaternion* outRotation)
 {
     RedLogger::Info(std::format("Finding delivery position for vehicle type {} and id {}", ToString(vehicleType), vehicleId.name.hash));
     RedLogger::Info(std::format("{} garages available" , Garages.size()));
@@ -240,7 +225,7 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3& pl
 
         found = true;
 
-        auto distance = Distance(playerPosition, garage.Position);
+        auto distance = Distance(*playerPosition, garage.Position);
         RedLogger::Info(std::format("Distance to garage {} is {}", garage.Name, distance));
         if (distance < closestDistance)
         {
@@ -268,8 +253,14 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3& pl
 
     const auto& selectedSlot = matchingSlots.at(randomSlot);
 
-    outPosition = selectedSlot.Position;
-    outRotation = selectedSlot.Rotation;
+    outPosition->X = selectedSlot.Position.X;
+    outPosition->Y = selectedSlot.Position.Y;
+    outPosition->Z = selectedSlot.Position.Z;
+
+    outRotation->i = selectedSlot.Rotation.i;
+    outRotation->j = selectedSlot.Rotation.j;
+    outRotation->k = selectedSlot.Rotation.k;
+    outRotation->r = selectedSlot.Rotation.r;
 
     return found;
 }
