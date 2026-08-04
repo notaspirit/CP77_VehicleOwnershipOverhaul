@@ -23,6 +23,7 @@ std::vector<RealisticVehicleSystem::Garage> Garages;
 RED4ext::gamedataVehicleType currentVehicleType;
 RED4ext::TweakDBID currentVehicleID;
 bool spawnedCurrentVehicle = false;
+std::string lastDeliveredGarageName;
 
 std::unordered_map<std::string, RED4ext::TweakDBID> RecordHashFlatNameIDMap;
 
@@ -138,7 +139,7 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
         message.isShown = true;
         message.duration = 5.0f;
         message.isInstant = true;
-        message.message = "Delivered " + std::string(locText.c_str());
+        message.message = std::format("Delivered {} to {}", locText.c_str(), lastDeliveredGarageName);
         message.type = RED4ext::SimpleMessageType::Neutral;
 
         RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
@@ -286,6 +287,8 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
     outRotation->j = selectedSlot.Rotation.j;
     outRotation->k = selectedSlot.Rotation.k;
     outRotation->r = selectedSlot.Rotation.r;
+
+    lastDeliveredGarageName = closestGarage.Name;
 
     return found;
 }
