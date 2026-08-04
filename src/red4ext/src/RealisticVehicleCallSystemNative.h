@@ -20,8 +20,15 @@ public:
     static RED4ext::TweakDBID* __fastcall hkTweakDBIdCtorDerive(RED4ext::TweakDBID* base, RED4ext::TweakDBID* id, const char* name);
     static void TransactMoney(int quantity);
 
+    static bool FindDeliveryPosition(RED4ext::Vector3 &playerPosition, RED4ext::gamedataVehicleType vehicleType,
+                                     RED4ext::TweakDBID vehicleId, RED4ext::Vector3 &outPosition, RED4ext::Quaternion &outRotation);
+
     static void SetSpawnPoint(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
     static void ShowSimpleScreenMessage(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
+
+    static void sInitialize(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
+
+    static void Initialize();
 
     RED4ext::CClass* GetNativeType();
 };

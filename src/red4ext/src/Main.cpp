@@ -47,6 +47,12 @@ namespace RealisticVehicleCallSystem
         showSimpleScreenMessage->AddParam("gameSimpleScreenMessage", "message");
 
         customControllerClass.RegisterFunction(showSimpleScreenMessage);
+
+        const auto initialize =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "Initialize", "Initialize",
+            &RealisticVehicleCallSystemNative::sInitialize, {.isNative = true, .isStatic = true});
+
+        customControllerClass.RegisterFunction(initialize);
     }
 
     RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason, const RED4ext::Sdk* aSdk)
@@ -62,8 +68,6 @@ namespace RealisticVehicleCallSystem
                 RED4ext::CRTTISystem::Get()->AddPostRegisterCallback(PostRegisterTypes);
 
                 RealisticVehicleCallSystemNative::Hook();
-
-                RedLogger::Info("RealisticVehicleCallSystem loaded");
                 break;
             }
             case RED4ext::EMainReason::Unload:

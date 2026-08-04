@@ -1,9 +1,12 @@
 #include <RealisticVehicleCallSystemNative.h>
 
 #include <RedLib.hpp>
+
+#include "GarageLoader.h"
 #include "RedLogger.h"
 #include "../vendor/MinHook/include/MinHook.h"
 #include "DataStructs/Addresses.h"
+#include "DataStructs/Garage.h"
 #include "DataStructs/Globals.h"
 #include "RED4ext/Scripting/Natives/Generated/game/SimpleScreenMessage.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/TransactionSystem.hpp"
@@ -11,9 +14,14 @@
 #include "RED4ext/Scripting/Natives/Generated/game/bb/AllScriptDefinitions.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
+#include "RED4ext/Scripting/Natives/Generated/world/TrafficLightColor.hpp"
 
 namespace RealisticVehicleCallSystem
 {
+std::vector<RealisticVehicleSystem::Garage> Garages;
+
+RED4ext::gamedataVehicleType currentVehicleType;
+RED4ext::TweakDBID currentVehicleID;
 
 std::unordered_map<std::string, RED4ext::TweakDBID> RecordHashFlatNameIDMap;
 
@@ -56,16 +64,32 @@ void RealisticVehicleCallSystemNative::Hook()
 }
 char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, float* playerPosition, float* outPosition, float* playerAndOutRotation)
 {
-    oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
+    char oResult = oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
 
-    outPosition[0] = spawnPosition.X;
-    outPosition[1] = spawnPosition.Y;
-    outPosition[2] = spawnPosition.Z;
+    RED4ext::Vector3 playerPosition3D(playerPosition[0], playerPosition[1], playerPosition[2]);
+    RED4ext::Vector3 outPosition3D;
+    RED4ext::Quaternion outRotation3D;
 
-    playerAndOutRotation[0] = spawnRotation.i;
-    playerAndOutRotation[1] = spawnRotation.j;
-    playerAndOutRotation[2] = spawnRotation.k;
-    playerAndOutRotation[3] = spawnRotation.r;
+    RedLogger::Info("Finished calling original findSpawnLocation method, setup variables for own method");
+
+    if (!FindDeliveryPosition(playerPosition3D, currentVehicleType, currentVehicleID, outPosition3D, outRotation3D))
+    {
+        RedLogger::Info("Finished FindDeliveryPosition with result false");
+        return oResult;
+    }
+
+    RedLogger::Info("Finished FindDeliveryPosition with result true");
+
+    outPosition[0] = outPosition3D.X;
+    outPosition[1] = outPosition3D.Y;
+    outPosition[2] = outPosition3D.Z;
+
+    playerAndOutRotation[0] = outRotation3D.i;
+    playerAndOutRotation[1] = outRotation3D.j;
+    playerAndOutRotation[2] = outRotation3D.k;
+    playerAndOutRotation[3] = outRotation3D.r;
+
+    RedLogger::Info("Set out variables, returning 1");
 
     return 1;
 }
@@ -73,6 +97,9 @@ char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::g
 bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem *vehicleSystem,
     RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad)
 {
+    currentVehicleType = vehicleType;
+    currentVehicleID = vehicleID;
+
     bool result = oSpawnPlayerVehicle(vehicleSystem, vehicleType, vehicleID, spawnOnlyOnValidRoad);
 
     char buf[512];
@@ -149,6 +176,104 @@ void RealisticVehicleCallSystemNative::TransactMoney(int quantity)
     RED4ext::ExecuteFunction("gameTransactionSystem", "GiveItemByTDBID", &result, player, itemID, quantity);
 }
 
+float Distance(const RED4ext::Vector3& a, const RED4ext::Vector3& b)
+{
+    float dx = a.X - b.X;
+    float dy = a.Y - b.Y;
+    float dz = a.Z - b.Z;
+
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+bool GarageSupports(const RealisticVehicleSystem::Garage& garage, const RED4ext::gamedataVehicleType vehicleType, const RED4ext::TweakDBID vehicleId)
+{
+    if (!garage.VehicleTypes.at(vehicleType))
+        return false;
+
+    if (!garage.WhiteListedVehicles.empty() && !garage.WhiteListedVehicles.contains(vehicleId))
+        return false;
+
+    if (!garage.BlackListedVehicles.empty() && garage.BlackListedVehicles.contains(vehicleId))
+        return false;
+
+    return true;
+}
+
+bool SlotSupports(const RealisticVehicleSystem::Slot& slot, const RED4ext::gamedataVehicleType vehicleType, const RED4ext::TweakDBID vehicleId)
+{
+    if (!slot.VehicleTypes.at(vehicleType))
+        return false;
+
+    if (!slot.WhiteListedVehicles.empty() && !slot.WhiteListedVehicles.contains(vehicleId))
+        return false;
+
+    if (!slot.BlackListedVehicles.empty() && slot.BlackListedVehicles.contains(vehicleId))
+        return false;
+
+    return true;
+}
+
+bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3& playerPosition,
+    const RED4ext::gamedataVehicleType vehicleType,
+    const RED4ext::TweakDBID vehicleId,
+    RED4ext::Vector3& outPosition,
+    RED4ext::Quaternion& outRotation)
+{
+    RedLogger::Info(std::format("Finding delivery position for vehicle type {} and id {}", ToString(vehicleType), vehicleId.name.hash));
+    RedLogger::Info(std::format("{} garages available" , Garages.size()));
+    if (Garages.empty())
+        return false;
+
+    RealisticVehicleSystem::Garage closestGarage;
+    float closestDistance = std::numeric_limits<float>::max();
+    bool found = false;
+
+    for (const auto& garage : Garages)
+    {
+        RedLogger::Info(std::format("Checking garage {}" , garage.Name));
+
+        if (!GarageSupports(garage, vehicleType, vehicleId))
+        {
+            RedLogger::Info(std::format("Garage {} does not support vehicle type {} and id {}", garage.Name, ToString(vehicleType), vehicleId.name.hash));
+            continue;
+        }
+
+        found = true;
+
+        auto distance = Distance(playerPosition, garage.Position);
+        RedLogger::Info(std::format("Distance to garage {} is {}", garage.Name, distance));
+        if (distance < closestDistance)
+        {
+            RedLogger::Info(std::format("New closest garage {} with distance {}", garage.Name, distance));
+
+            closestGarage = garage;
+            closestDistance = distance;
+        }
+    }
+
+    std::vector<RealisticVehicleSystem::Slot> matchingSlots;
+
+    for (const auto& slot : closestGarage.Slots)
+        if (SlotSupports(slot, vehicleType, vehicleId))
+            matchingSlots.push_back(slot);
+
+    RedLogger::Info(std::format("{} matching slots found", matchingSlots.size()));
+
+    if (matchingSlots.empty())
+        return false;
+
+    auto randomSlot = g_rng.getInt32(matchingSlots.size() - 1, 0);
+
+    RedLogger::Info(std::format("Random slot is {}", randomSlot));
+
+    const auto& selectedSlot = matchingSlots.at(randomSlot);
+
+    outPosition = selectedSlot.Position;
+    outRotation = selectedSlot.Rotation;
+
+    return found;
+}
+
 void RealisticVehicleCallSystemNative::SetSpawnPoint(
     RED4ext::IScriptable *aContext,
     RED4ext::CStackFrame *aFrame,
@@ -176,6 +301,23 @@ void RealisticVehicleCallSystemNative::ShowSimpleScreenMessage(
     aFrame->code++;
 
     // do nothing, CET script will observe method call and post message
+}
+
+void RealisticVehicleCallSystemNative::sInitialize(
+    RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame,
+    RED4ext::CString *aOut,
+    int64_t a4)
+{
+    aFrame->code++;
+
+    Initialize();
+}
+
+void RealisticVehicleCallSystemNative::Initialize()
+{
+    g_rng.state = std::chrono::steady_clock::now().time_since_epoch().count();
+    Garages = GarageLoader::LoadGarages();
 }
 }
 
