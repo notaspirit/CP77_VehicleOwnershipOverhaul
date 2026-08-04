@@ -22,6 +22,7 @@ std::vector<RealisticVehicleSystem::Garage> Garages;
 
 RED4ext::gamedataVehicleType currentVehicleType;
 RED4ext::TweakDBID currentVehicleID;
+bool spawnedCurrentVehicle = false;
 
 std::unordered_map<std::string, RED4ext::TweakDBID> RecordHashFlatNameIDMap;
 
@@ -37,6 +38,9 @@ SpawnPlayerVehicle_t oSpawnPlayerVehicle = nullptr;
 typedef RED4ext::TweakDBID* (__fastcall* TweakDBIdCtorDerive_t)(RED4ext::TweakDBID*, RED4ext::TweakDBID*, const char*);
 TweakDBIdCtorDerive_t oTweakDBIdCtorDerive = nullptr;
 
+typedef uint64_t (__fastcall* SummonVehicle_t)(long long param_1, uint32_t *param_2, uint64_t param_3, uint64_t param_4, uint64_t param_5, char param_6, uint8_t  param_7, uint32_t param_8, uint8_t  param_9, void*    param_10);
+SummonVehicle_t oSummonVehicle = nullptr;
+
 void RealisticVehicleCallSystemNative::Hook()
 {
     RedLogger::Info("Hooking VehicleSystem");
@@ -46,6 +50,7 @@ void RealisticVehicleCallSystemNative::Hook()
     uintptr_t base = (uintptr_t)GetModuleHandleA(nullptr);
     void* findSpawnLocationAddress = (void*)(base + 0x25e64fc);
     void* spawnPlayerVehicleAddress = (void*)(base + 0x1ccec50);
+    void* SummonVehicleAddress = (void*)(base + 0x1ce7f80);
 
     const RED4ext::UniversalRelocPtr<uint8_t> TweakDBIdConstructorMethod(Addresses::CScript_TDBIDConstructorDerive);
     uint8_t* TweakDBIdConstructorAddress = TweakDBIdConstructorMethod.GetAddr();
@@ -58,6 +63,9 @@ void RealisticVehicleCallSystemNative::Hook()
 
     MH_CreateHook(TweakDBIdConstructorAddress, &RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive, reinterpret_cast<void**>(&oTweakDBIdCtorDerive));
     MH_EnableHook(TweakDBIdConstructorAddress);
+
+    MH_CreateHook(SummonVehicleAddress, &RealisticVehicleCallSystemNative::hkSummonVehicle, reinterpret_cast<void**>(&oSummonVehicle));
+    MH_EnableHook(SummonVehicleAddress);
 
 
     RedLogger::Info("Finished Hooking");
@@ -80,10 +88,10 @@ char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::g
 }
 
 bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem *vehicleSystem,
-    RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad)
-{
+    RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad) {
     currentVehicleType = vehicleType;
     currentVehicleID = vehicleID;
+    spawnedCurrentVehicle = false;
 
     bool result = oSpawnPlayerVehicle(vehicleSystem, vehicleType, vehicleID, spawnOnlyOnValidRoad);
 
@@ -108,19 +116,18 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
     auto displayNameFlatId = RecordHashFlatNameIDMap.find(displayNameFlatName);
 
     if (displayNameFlatId == RecordHashFlatNameIDMap.end())
-        RedLogger::Warning("Could not find flat for " + displayNameFlatName);
-    else
     {
-        auto displayNameFlat = tdb->GetFlatValue(displayNameFlatId->second);
-        auto locKey = displayNameFlat->GetValue<RED4ext::gamedataLocKeyWrapper>();
+        RedLogger::Warning("Could not find flat for " + displayNameFlatName);
+        return result;
+    }
 
-        RedLogger::Info("LocKey for display name is: " + std::to_string(locKey->primaryKey));
+    auto displayNameFlat = tdb->GetFlatValue(displayNameFlatId->second);
+    auto locKey = displayNameFlat->GetValue<RED4ext::gamedataLocKeyWrapper>();
+    RED4ext::CString locText;
+    RED4ext::ExecuteGlobalFunction("GetLocalizedTextByKey", &locText, locKey->primaryKey);
 
-        RED4ext::CString locText;
-        RED4ext::ExecuteGlobalFunction("GetLocalizedTextByKey", &locText, locKey->primaryKey);
-
-        RedLogger::Info("Display name is: " + std::string(locText.c_str()));
-
+    if (spawnedCurrentVehicle)
+    {
         TransactMoney(-1000);
 
         RED4ext::CString logMessage = "Vehicle Delivery";
@@ -136,6 +143,17 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
 
         RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
     }
+    else
+    {
+        RED4ext::SimpleScreenMessage message = { };
+        message.isShown = true;
+        message.duration = 5.0f;
+        message.isInstant = true;
+        message.message = std::string(locText.c_str()) + " is nearby";
+        message.type = RED4ext::SimpleMessageType::Neutral;
+
+        RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
+    }
 
     return result;
 }
@@ -147,6 +165,13 @@ RED4ext::TweakDBID* RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive(RED4
     auto stringId = std::to_string(base->name.hash) + std::string(name);
     RecordHashFlatNameIDMap[stringId] = *id;
     return result;
+}
+
+uint64_t RealisticVehicleCallSystemNative::hkSummonVehicle(long long param_1, uint32_t *param_2, uint64_t param_3,
+                                                            uint64_t param_4, uint64_t param_5, char param_6, uint8_t  param_7, uint32_t param_8, uint8_t  param_9, void*    param_10)
+{
+    spawnedCurrentVehicle = true;
+    return oSummonVehicle(param_1, param_2, param_3, param_4, param_5, param_6, param_7, param_8, param_9, param_10);
 }
 
 // based on CETs AddItemToInventory under MIT

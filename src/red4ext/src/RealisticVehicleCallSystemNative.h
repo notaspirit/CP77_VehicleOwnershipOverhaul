@@ -19,6 +19,10 @@ public:
                                                Quaternion *playerAndOutRotation);
     static bool __fastcall hkSpawnPlayerVehicle(RED4ext::gameVehicleSystem* vehicleSystem, RED4ext::gamedataVehicleType vehicleType, RED4ext::TweakDBID vehicleID, bool spawnOnlyOnValidRoad);
     static RED4ext::TweakDBID* __fastcall hkTweakDBIdCtorDerive(RED4ext::TweakDBID* base, RED4ext::TweakDBID* id, const char* name);
+
+    static uint64_t __fastcall hkSummonVehicle(long long param_1, uint32_t *param_2, uint64_t param_3, uint64_t param_4, uint64_t param_5, char param_6, uint8_t
+                                               param_7, uint32_t param_8, uint8_t param_9, void *param_10);
+
     static void TransactMoney(int quantity);
 
     static bool FindDeliveryPosition(RED4ext::Vector3 *playerPosition, RED4ext::gamedataVehicleType vehicleType,
