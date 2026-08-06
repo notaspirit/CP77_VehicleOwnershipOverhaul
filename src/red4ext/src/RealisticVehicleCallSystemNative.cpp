@@ -47,14 +47,25 @@ void RealisticVehicleCallSystemNative::Hook()
     RedLogger::Info("Hooking VehicleSystem");
 
     MH_Initialize();
-
+    /*
     uintptr_t base = (uintptr_t)GetModuleHandleA(nullptr);
+
     void* findSpawnLocationAddress = (void*)(base + 0x25e64fc);
     void* spawnPlayerVehicleAddress = (void*)(base + 0x1ccec50);
-    void* SummonVehicleAddress = (void*)(base + 0x1ce7f80);
+    void* summonVehicleAddress = (void*)(base + 0x1ce7f80);
+    */
 
     const RED4ext::UniversalRelocPtr<uint8_t> TweakDBIdConstructorMethod(Addresses::CScript_TDBIDConstructorDerive);
     uint8_t* TweakDBIdConstructorAddress = TweakDBIdConstructorMethod.GetAddr();
+
+    const RED4ext::UniversalRelocPtr<uint8_t> FindSpawnLocationMethod(Addresses::gameVehicleSystem_FindSpawnLocation);
+    uint8_t* findSpawnLocationAddress = FindSpawnLocationMethod.GetAddr();
+
+    const RED4ext::UniversalRelocPtr<uint8_t> SpawnPlayerVehicleMethod(Addresses::gameVehicleSystem_SpawnPlayerVehicle);
+    uint8_t* spawnPlayerVehicleAddress = SpawnPlayerVehicleMethod.GetAddr();
+
+    const RED4ext::UniversalRelocPtr<uint8_t> SummonVehicleAddressMethod(Addresses::gameVehicleSystem_SummonVehicle);
+    uint8_t* summonVehicleAddress = SummonVehicleAddressMethod.GetAddr();
 
     MH_CreateHook(findSpawnLocationAddress, &RealisticVehicleCallSystemNative::hkFindSpawnLocation, reinterpret_cast<void**>(&oFindSpawnLocation));
     MH_EnableHook(findSpawnLocationAddress);
@@ -65,8 +76,8 @@ void RealisticVehicleCallSystemNative::Hook()
     MH_CreateHook(TweakDBIdConstructorAddress, &RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive, reinterpret_cast<void**>(&oTweakDBIdCtorDerive));
     MH_EnableHook(TweakDBIdConstructorAddress);
 
-    MH_CreateHook(SummonVehicleAddress, &RealisticVehicleCallSystemNative::hkSummonVehicle, reinterpret_cast<void**>(&oSummonVehicle));
-    MH_EnableHook(SummonVehicleAddress);
+    MH_CreateHook(summonVehicleAddress, &RealisticVehicleCallSystemNative::hkSummonVehicle, reinterpret_cast<void**>(&oSummonVehicle));
+    MH_EnableHook(summonVehicleAddress);
 
 
     RedLogger::Info("Finished Hooking");

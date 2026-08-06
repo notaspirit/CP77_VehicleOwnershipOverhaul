@@ -7,8 +7,6 @@ add_library(${CMAKE_PROJECT_NAME} SHARED ""
         main.cpp
         DataStructs/Addresses.h
         DataStructs/Config.h
-        DataStructs/GarageSerialized.h
-        DataStructs/SlotSerialized.h
         DataStructs/Garage.h
         DataStructs/Slot.h
         GarageLoader.cpp
