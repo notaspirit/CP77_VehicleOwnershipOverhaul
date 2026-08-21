@@ -106,20 +106,7 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
 
     bool result = oSpawnPlayerVehicle(vehicleSystem, vehicleType, vehicleID, spawnOnlyOnValidRoad);
 
-    char buf[512];
-
-    snprintf(buf, sizeof(buf),
-        "[SpawnPlayerVehicle] result=%d\n"
-        "  vehicleType: %s\n"
-        "  vehicleID: %u\n"
-        "  spawnOnlyOnValidRoad: %d",
-        result,
-        ToString(vehicleType),
-        vehicleID.name.hash,
-        spawnOnlyOnValidRoad
-    );
-
-    RedLogger::Info(buf);
+    RedLogger::Info("[SpawnPlayerVehicle] result={}\nvehicleType: {}\nvehicleID: {}\nspawnOnlyOnValidRoad: {}", result, ToString(vehicleType), vehicleID.name.hash, spawnOnlyOnValidRoad);
 
     auto tdb = RED4ext::TweakDB::Get();
 
@@ -128,7 +115,7 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
 
     if (displayNameFlatId == RecordHashFlatNameIDMap.end())
     {
-        RedLogger::Warning("Could not find flat for " + displayNameFlatName);
+        RedLogger::Warning("Could not find flat for {}", displayNameFlatName);
         return result;
     }
 
@@ -243,7 +230,7 @@ bool IsGarageBought(RealisticVehicleSystem::Garage garage)
     RED4ext::CString questFactCString(garage.QuestFact.c_str());
     RED4ext::ExecuteFunction("questQuestsSystem", "GetFactStr", &result, questFactCString);
 
-    RedLogger::Info(std::format("checked quest fact using questQuestsSystem.GetFactStr() with CString: {} (original string: {}) result is {}", questFactCString.c_str(), garage.QuestFact, result));
+    RedLogger::Info("checked quest fact using questQuestsSystem.GetFactStr() with CString: {} (original string: {}) result is {}", questFactCString.c_str(), garage.QuestFact, result);
 
     return result == 1;
 }
@@ -254,8 +241,8 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
     RED4ext::Vector3* outPosition,
     RED4ext::Quaternion* outRotation)
 {
-    RedLogger::Info(std::format("Finding delivery position for vehicle type {} and id {}", ToString(vehicleType), vehicleId.name.hash));
-    RedLogger::Info(std::format("{} garages available" , Garages.size()));
+    RedLogger::Info("Finding delivery position for vehicle type {} and id {}", ToString(vehicleType), vehicleId.name.hash);
+    RedLogger::Info("{} garages available" , Garages.size());
     if (Garages.empty())
         return false;
 
@@ -265,27 +252,27 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
 
     for (const auto& garage : Garages)
     {
-        RedLogger::Info(std::format("Checking garage {}" , garage.Name));
+        RedLogger::Info("Checking garage {}" , garage.Name);
 
         if (!IsGarageBought(garage))
         {
-            RedLogger::Info(std::format("Garage {} is not bought", garage.Name));
+            RedLogger::Info("Garage {} is not bought", garage.Name);
             continue;
         }
 
         if (!GarageSupports(garage, vehicleType, vehicleId))
         {
-            RedLogger::Info(std::format("Garage {} does not support vehicle type {} and id {}", garage.Name, ToString(vehicleType), vehicleId.name.hash));
+            RedLogger::Info("Garage {} does not support vehicle type {} and id {}", garage.Name, ToString(vehicleType), vehicleId.name.hash);
             continue;
         }
 
         found = true;
 
         auto distance = Distance(*playerPosition, garage.Position);
-        RedLogger::Info(std::format("Distance to garage {} is {}", garage.Name, distance));
+        RedLogger::Info("Distance to garage {} is {}", garage.Name, distance);
         if (distance < closestDistance)
         {
-            RedLogger::Info(std::format("New closest garage {} with distance {}", garage.Name, distance));
+            RedLogger::Info("New closest garage {} with distance {}", garage.Name, distance);
 
             closestGarage = garage;
             closestDistance = distance;
@@ -298,14 +285,14 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
         if (SlotSupports(slot, vehicleType, vehicleId))
             matchingSlots.push_back(slot);
 
-    RedLogger::Info(std::format("{} matching slots found", matchingSlots.size()));
+    RedLogger::Info("{} matching slots found", matchingSlots.size());
 
     if (matchingSlots.empty())
         return false;
 
     auto randomSlot = g_rng.getInt32(matchingSlots.size() - 1, 0);
 
-    RedLogger::Info(std::format("Random slot is {}", randomSlot));
+    RedLogger::Info("Random slot is {}", randomSlot);
 
     const auto& selectedSlot = matchingSlots.at(randomSlot);
 

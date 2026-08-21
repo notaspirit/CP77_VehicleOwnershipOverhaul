@@ -51,7 +51,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
         garagesDir = GetExeDir().string() + R"(\plugins\cyber_engine_tweaks\mods\###RealisticVehicleCallSystem\data\garages)";
     }
     catch (const std::exception& e) {
-        RedLogger::Error(std::format("Failed to get executable directory. Cannot load garage files."));
+        RedLogger::Error("Failed to get executable directory. Cannot load garage files.");
         return {};
     }
 
@@ -70,16 +70,16 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
         buffer << fileStream.rdbuf();
         doc.Parse(buffer.str().c_str());
 
-        RedLogger::Info(std::format("Loading garage file {}", fileName));
+        RedLogger::Info("Loading garage file {}", fileName);
 
         if (doc.HasParseError()) {
-            RedLogger::Error(std::format("Failed to parse category file with error {}.", rapidjson::GetParseError_En(doc.GetParseError())));
+            RedLogger::Error("Failed to parse category file with error {}.", rapidjson::GetParseError_En(doc.GetParseError()));
             continue;
         }
 
         if (!RapidJsonHelper::IsObjectArray(doc))
         {
-            RedLogger::Error(std::format("Failed to load garage file {}: File must be array of garages.", fileName));
+            RedLogger::Error("Failed to load garage file {}: File must be array of garages.", fileName);
             continue;
         }
 
@@ -90,7 +90,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
             if (!RapidJsonHelper::TryGetStringValue(garageJson, "Name", garage.Name))
             {
-                RedLogger::Error(std::format("Failed to load garage index {} in file {} : Garage must have a Name property of type string", i, fileName));
+                RedLogger::Error("Failed to load garage index {} in file {} : Garage must have a Name property of type string", i, fileName);
                 i++;
                 continue;
             }
@@ -109,7 +109,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
             if (!RapidJsonHelper::TryGetStringValue(garageJson, "QuestFact", garage.QuestFact))
             {
-                RedLogger::Error(std::format("Failed to load garage index {} in file {} : Garage must have a QuestFact property of type string", i, fileName));
+                RedLogger::Error("Failed to load garage index {} in file {} : Garage must have a QuestFact property of type string", i, fileName);
                 i++;
                 continue;
             }
@@ -117,7 +117,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
             if (!RapidJsonHelper::IsObjectArray(garageJson, "Slots"))
             {
-                RedLogger::Error(std::format("Failed to load garage index {} in file {} : Garage must have a Slots property of type array of object", i, fileName));
+                RedLogger::Error("Failed to load garage index {} in file {} : Garage must have a Slots property of type array of object", i, fileName);
                 i++;
                 continue;
             }
@@ -147,7 +147,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
                 if (!RapidJsonHelper::IsStringArray(slotJson, "VehicleTypes"))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} garage index {} in file {} : Garage slot must have a VehicleTypes property of type array of strings", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} garage index {} in file {} : Garage slot must have a VehicleTypes property of type array of strings", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -161,12 +161,12 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
                     else if (strcmp(vehicleTypeJson.GetString(), "Panzer"))
                         slot.VehicleTypes[RED4ext::gamedataVehicleType::Panzer] = true;
                     else
-                        RedLogger::Warning(std::format("Unknown vehicle type {} in slot index {} garage index {} in file {}", vehicleTypeJson.GetString(), si, i, fileName));
+                        RedLogger::Warning("Unknown vehicle type {} in slot index {} garage index {} in file {}", vehicleTypeJson.GetString(), si, i, fileName);
                 }
 
                 if (!RapidJsonHelper::IsStringArray(slotJson, "WhiteListedVehicles"))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} garage index {} in file {} : Garage slot must have a WhiteListedVehicles property of type array of strings", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} garage index {} in file {} : Garage slot must have a WhiteListedVehicles property of type array of strings", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -176,7 +176,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
                 if (!RapidJsonHelper::IsStringArray(slotJson, "BlackListedVehicles"))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} garage index {} in file {} : Garage slot must have a BlackListedVehicles property of type array of strings", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} garage index {} in file {} : Garage slot must have a BlackListedVehicles property of type array of strings", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -187,7 +187,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
                 if (!RapidJsonHelper::IsObject(slotJson, "Position"))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} in garage index {} in file {} : Garage slot must have a Position property of type object", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} in garage index {} in file {} : Garage slot must have a Position property of type object", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -198,7 +198,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
                     !RapidJsonHelper::TryGetFloatValue(slotJson["Position"], "Y", y) ||
                     !RapidJsonHelper::TryGetFloatValue(slotJson["Position"], "Z", z))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} in garage index {} in file {} : Garage slot Position must have X, Y and Z properties of type float", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} in garage index {} in file {} : Garage slot Position must have X, Y and Z properties of type float", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -207,7 +207,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
                 if (!RapidJsonHelper::IsObject(slotJson, "Rotation"))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} in garage index {} in file {} : Garage slot must have a Rotation property of type object", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} in garage index {} in file {} : Garage slot must have a Rotation property of type object", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -219,7 +219,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
                     !RapidJsonHelper::TryGetFloatValue(slotJson["Rotation"], "K", rk) ||
                     !RapidJsonHelper::TryGetFloatValue(slotJson["Rotation"], "R", rr))
                 {
-                    RedLogger::Error(std::format("Failed to load slot index {} in garage index {} in file {} : Garage slot Rotation must have I, J, K and R properties of type float", si, i, fileName));
+                    RedLogger::Error("Failed to load slot index {} in garage index {} in file {} : Garage slot Rotation must have I, J, K and R properties of type float", si, i, fileName);
                     si++;
                     continue;
                 }
@@ -250,7 +250,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
             };
 
             if (garage.Slots.empty())
-                RedLogger::Warning(std::format("Garage {} has no slots", garage.Name));
+                RedLogger::Warning("Garage {} has no slots", garage.Name);
             else
                 garages.push_back(garage);
 

@@ -2,7 +2,6 @@ add_library(${CMAKE_PROJECT_NAME} SHARED ""
         DataStructs/Globals.h
         RealisticVehicleCallSystemNative.h
         RealisticVehicleCallSystemNative.cpp
-        RedLogger.cpp
         RedLogger.h
         main.cpp
         DataStructs/Addresses.h
