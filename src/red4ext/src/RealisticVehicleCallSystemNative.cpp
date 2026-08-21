@@ -14,7 +14,6 @@
 #include "RED4ext/Scripting/Natives/Generated/game/bb/AllScriptDefinitions.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
-#include "RED4ext/Scripting/Natives/Generated/world/TrafficLightColor.hpp"
 
 namespace RealisticVehicleCallSystem
 {
@@ -235,6 +234,20 @@ bool SlotSupports(const RealisticVehicleSystem::Slot& slot, const RED4ext::gamed
     return true;
 }
 
+bool IsGarageBought(RealisticVehicleSystem::Garage garage)
+{
+    if (garage.QuestFact.empty())
+        return true;
+
+    int32_t result;
+    RED4ext::CString questFactCString(garage.QuestFact.c_str());
+    RED4ext::ExecuteFunction("questQuestsSystem", "GetFactStr", &result, questFactCString);
+
+    RedLogger::Info(std::format("checked quest fact using questQuestsSystem.GetFactStr() with CString: {} (original string: {}) result is {}", questFactCString.c_str(), garage.QuestFact, result));
+
+    return result == 1;
+}
+
 bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* playerPosition,
     const RED4ext::gamedataVehicleType vehicleType,
     const RED4ext::TweakDBID vehicleId,
@@ -253,6 +266,12 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
     for (const auto& garage : Garages)
     {
         RedLogger::Info(std::format("Checking garage {}" , garage.Name));
+
+        if (!IsGarageBought(garage))
+        {
+            RedLogger::Info(std::format("Garage {} is not bought", garage.Name));
+            continue;
+        }
 
         if (!GarageSupports(garage, vehicleType, vehicleId))
         {
