@@ -4,18 +4,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED ""
         RealisticVehicleCallSystemNative.cpp
         RedLogger.h
         main.cpp
-        DataStructs/Addresses.h
-        DataStructs/Config.h
-        DataStructs/Garage.h
-        DataStructs/Slot.h
-        GarageLoader.cpp
-        GarageLoader.h
-        FastRNG.cpp
-        FastRNG.h
-        RapidJsonHelper.cpp
-        RapidJsonHelper.h
-        TweakDBIDHasher.h
-        GenericHelpers.h)
+        DataStructs/Addresses.h)
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${PROJECT_HEADER_FILES} ${PROJECT_SRC_FILES})
 

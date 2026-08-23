@@ -32,28 +32,6 @@ namespace RealisticVehicleCallSystem
         const auto scriptable = rtti->GetClass("IScriptable");
         customControllerClass.parent = scriptable;
 
-        const auto setSpawnPoint =
-            RED4ext::CClassStaticFunction::Create(&customControllerClass, "SetSpawnPoint", "SetSpawnPoint",
-            &RealisticVehicleCallSystemNative::SetSpawnPoint, {.isNative = true, .isStatic = true});
-
-        setSpawnPoint->AddParam("Vector4", "position");
-        setSpawnPoint->AddParam("Quaternion", "rotation");
-        customControllerClass.RegisterFunction(setSpawnPoint);
-
-        const auto showSimpleScreenMessage =
-            RED4ext::CClassStaticFunction::Create(&customControllerClass, "ShowSimpleScreenMessage", "ShowSimpleScreenMessage",
-            &RealisticVehicleCallSystemNative::ShowSimpleScreenMessage, {.isNative = true, .isStatic = true});
-
-        showSimpleScreenMessage->AddParam("gameSimpleScreenMessage", "message");
-
-        customControllerClass.RegisterFunction(showSimpleScreenMessage);
-
-        const auto initialize =
-            RED4ext::CClassStaticFunction::Create(&customControllerClass, "Initialize", "Initialize",
-            &RealisticVehicleCallSystemNative::sInitialize, {.isNative = true, .isStatic = true});
-
-        customControllerClass.RegisterFunction(initialize);
-
         const auto preSpawnPlayerVehicle =
             RED4ext::CClassStaticFunction::Create(&customControllerClass, "hkPreSpawnPlayerVehicle", "hkPreSpawnPlayerVehicle",
             &RealisticVehicleCallSystemNative::hkPreSpawnPlayerVehicleRTTI, {.isNative = true, .isStatic = true});
