@@ -11,6 +11,7 @@ local ReturnValue = require("models/return_value")
 ---@field public currentVehicleID TweakDBID
 ---@field public currentVehicleSpawned boolean
 ---@field public currentDeliveredGarageName string
+---@field public currentOccupyingVehicle vehicleCarBaseObject
 ---@field public new fun(): VehicleOwnershipOverhaul
 ---@field public LoadGarages fun(self: VehicleOwnershipOverhaul): void
 ---@field private PreSpawnPlayerVehicleNativeHook fun(self: VehicleOwnershipOverhaul, vehicleType: gamedataVehicleType, vehicleId: TweakDBID, spawnOnlyOnValidRoad: boolean): void
@@ -19,6 +20,8 @@ local ReturnValue = require("models/return_value")
 ---@field private PreSummonVehicleNativeHook fun(self: VehicleOwnershipOverhaul): void
 ---@field private IsGarageBought fun(garage: Garage): boolean
 ---@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
+---@field private CheckSlotOccupancy fun(slot: GarageSlot): entEntity | nil
+---@field private DespawnOccupyingEntity fun(self: VehicleOwnershipOverhaul): void
 local VehicleOwnershipOverhaul = {}
 
 VehicleOwnershipOverhaul.__index = VehicleOwnershipOverhaul
@@ -94,6 +97,9 @@ function VehicleOwnershipOverhaul:PostSpawnPlayerVehicleNativeHook(vehicleType, 
     local name = Game.GetLocalizedTextByKey(TDB.GetLocKey(tdbid .. ".displayName"))
     
     if (self.currentVehicleSpawned) then
+        -- works even though it is technically after the native method has completed
+        self:DespawnOccupyingEntity()
+
         Game.AddToInventory("Items.money", -1000)
         local als = Game.GetActivityLogSystem()
         als:AddLog("Vehicle Delivery")
@@ -106,6 +112,11 @@ function VehicleOwnershipOverhaul:PostSpawnPlayerVehicleNativeHook(vehicleType, 
         msg.message = name .. " is nearby"
         GameInstance.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(msg), true)
     end
+
+    self.currentOccupyingVehicle = nil
+    self.currentVehicleSpawned = nil
+    self.currentVehicleType = nil
+    self.currentVehicleId = nil
 end
 
 function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition, outPosition, playerAndOutRotation)
@@ -166,11 +177,29 @@ function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition,
         return wt
     end
 
+    utils.ShuffleArray(matchingSlots)
+
     ---@type GarageSlot
-    local randomSlot = matchingSlots[math.random(1, #matchingSlots)]
+    local randomSlot = nil
 
-    print("spawning vehicle at x: " .. randomSlot.position.x .. " y: " .. randomSlot.position.y .. " z: " .. randomSlot.position.z)
+    ---@type table<entEntity>
+    local slotEntityLookup = {}
 
+    for i, slot in ipairs(matchingSlots) do
+        local occupiedEnt = self.CheckSlotOccupancy(slot)
+        if occupiedEnt == nil then
+            randomSlot = slot
+            break
+        else
+            slotEntityLookup[i] = occupiedEnt
+        end
+    end
+
+    if randomSlot == nil then
+        self.currentOccupyingVehicle = slotEntityLookup[1]
+        randomSlot = matchingSlots[1]
+    end
+    
     wt:SetPosition(utils.Vec3ToVec4(randomSlot.position))
     wt:SetOrientation(randomSlot.rotation)
 
@@ -210,6 +239,36 @@ function VehicleOwnershipOverhaul.GarageOrSlotSupports(garageOrSlot, vehicleType
     end
 
     return true
+end
+
+function VehicleOwnershipOverhaul.CheckSlotOccupancy(slot)
+    local startV = utils.Vec3ToVec4(utils.AddVec3(slot.position, Vector3.new(0, 0, 0.2)))
+    local endV = utils.Vec3ToVec4(utils.AddVec3(startV, Vector3.new(0, 0, 2)))
+    local query = physicsQueryFilter.AddGroup("Vehicle")
+
+    local hit, traceResult = GameInstance.GetSpatialQueriesSystem():SyncRaycastByQueryFilter(startV, endV, query, false, false);
+
+    if not hit then
+        return nil
+    end
+
+    return traceResult:GetHitEntity()
+end
+
+function VehicleOwnershipOverhaul:DespawnOccupyingEntity()
+    local veh = self.currentOccupyingVehicle
+
+    if veh == nil then
+        return
+    end
+
+    if veh:IsPlayerVehicle() then
+        ---@type vehicleGarageVehicleID
+        local vehGarageId =  GarageVehicleID.Resolve(TDBID.ToStringDEBUG(veh:GetRecordID()))
+        Game.GetVehicleSystem():DespawnPlayerVehicle(vehGarageId)
+    else
+        veh:Dispose()
+    end
 end
 
 return VehicleOwnershipOverhaul

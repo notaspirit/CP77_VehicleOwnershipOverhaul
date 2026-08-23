@@ -7,12 +7,14 @@
 ---@field public isQuaternion fun(t: any): boolean
 ---@field public isString fun(t: any): boolean
 ---@field public GetVehicleTypeEnumFromString fun(vehicleType: string): integer?
----@field public AddVec3 fun(a: Vector3, b: Vector3): Vector3
+---@field public AddVec3 fun(a: Vector3 | Vector4, b: Vector3 | Vector4): Vector3
 ---@field public DivideVec3 fun(a: Vector3, scalar: number): Vector3
 ---@field public Vec3ToVec4 fun(a: Vector3): Vector4
 ---@field public BuildDefaultSimpleMessage fun(): SimpleScreenMessage
----@field public Distance fun(a: Vector3|Vector4, b: Vector3|Vector4): number
+---@field public Distance fun(a: Vector3 | Vector4, b: Vector3 | Vector4): number
 ---@field public ListFilesInDir fun(directory: string, ext: string): table<string>
+---@field public ShuffleArray fun(t: table): void
+---@field public DeepCopy fun(t: table): table
 local Utils = {}
 
 function Utils.buildVehicleTypeDict()
@@ -166,6 +168,25 @@ function Utils.ListFilesInDir(directory, ext)
     end
     
     return files
+end
+
+function Utils.ShuffleArray(t)
+    for i = #t, 2, -1 do
+        local j = math.random(1, i)
+        t[i], t[j] = t[j], t[i]
+    end
+end
+
+function Utils.DeepCopy(t)
+    local o = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            o[k] = Utils.DeepCopy(v)
+        else
+            o[k] = v
+        end
+    end
+    return o
 end
 
 return Utils
