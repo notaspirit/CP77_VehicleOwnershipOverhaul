@@ -5,6 +5,7 @@
 #include "RED4ext/Scripting/Stack.hpp"
 #include "RED4ext/Scripting/Natives/Quaternion.hpp"
 #include "RED4ext/Scripting/Natives/Vector4.hpp"
+#include "RED4ext/Scripting/Natives/Generated/WorldTransform.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 
@@ -22,6 +23,12 @@ public:
 
     static uint64_t __fastcall hkSummonVehicle(long long param_1, uint32_t *param_2, uint64_t param_3, uint64_t param_4, uint64_t param_5, char param_6, uint8_t
                                                param_7, uint32_t param_8, uint8_t param_9, void *param_10);
+
+    static void hkPreSpawnPlayerVehicleRTTI(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
+    static void hkPreFindSpawnLocationRTTI(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::WorldTransform *aOut, int64_t a4);
+    static void hkPreSummonVehicleRTTI(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
+
+    static void hkPostSpawnPlayerVehicleRTTI(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4);
 
     static void TransactMoney(int quantity);
 

@@ -53,6 +53,43 @@ namespace RealisticVehicleCallSystem
             &RealisticVehicleCallSystemNative::sInitialize, {.isNative = true, .isStatic = true});
 
         customControllerClass.RegisterFunction(initialize);
+
+        const auto preSpawnPlayerVehicle =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "hkPreSpawnPlayerVehicle", "hkPreSpawnPlayerVehicle",
+            &RealisticVehicleCallSystemNative::hkPreSpawnPlayerVehicleRTTI, {.isNative = true, .isStatic = true});
+
+        preSpawnPlayerVehicle->AddParam("gamedataVehicleType", "vehicleType");
+        preSpawnPlayerVehicle->AddParam("TweakDBID", "vehicleId");
+        preSpawnPlayerVehicle->AddParam("Bool", "spawnOnlyOnValidRoad");
+
+        customControllerClass.RegisterFunction(preSpawnPlayerVehicle);
+
+        const auto postSpawnPlayerVehicle =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "hkPostSpawnPlayerVehicle", "hkPostSpawnPlayerVehicle",
+            &RealisticVehicleCallSystemNative::hkPostSpawnPlayerVehicleRTTI, {.isNative = true, .isStatic = true});
+
+        postSpawnPlayerVehicle->AddParam("gamedataVehicleType", "vehicleType");
+        postSpawnPlayerVehicle->AddParam("TweakDBID", "vehicleId");
+        postSpawnPlayerVehicle->AddParam("Bool", "spawnOnlyOnValidRoad");
+
+        customControllerClass.RegisterFunction(postSpawnPlayerVehicle);
+
+        const auto preFindSpawnLocation =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "hkPreFindSpawnLocation", "hkPreFindSpawnLocation",
+            &RealisticVehicleCallSystemNative::hkPreFindSpawnLocationRTTI, {.isNative = true, .isStatic = true});
+
+        preFindSpawnLocation->SetReturnType("WorldTransform");
+        preFindSpawnLocation->AddParam("Vector3", "playerPosition");
+        preFindSpawnLocation->AddParam("Vector3", "outPosition");
+        preFindSpawnLocation->AddParam("Quaternion", "playerAndOutRotation");
+
+        customControllerClass.RegisterFunction(preFindSpawnLocation);
+
+        const auto preSummonVehicle =
+            RED4ext::CClassStaticFunction::Create(&customControllerClass, "hkPreSummonVehicle", "hkPreSummonVehicle",
+            &RealisticVehicleCallSystemNative::hkPreSummonVehicleRTTI, {.isNative = true, .isStatic = true});
+
+        customControllerClass.RegisterFunction(preSummonVehicle);
     }
 
     RED4EXT_C_EXPORT bool RED4EXT_CALL Main(RED4ext::PluginHandle aHandle, RED4ext::EMainReason aReason, const RED4ext::Sdk* aSdk)

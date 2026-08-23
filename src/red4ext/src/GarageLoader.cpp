@@ -48,7 +48,7 @@ std::vector<RealisticVehicleSystem::Garage> GarageLoader::LoadGarages()
 
     std::string garagesDir;
     try {
-        garagesDir = GetExeDir().string() + R"(\plugins\cyber_engine_tweaks\mods\###RealisticVehicleCallSystem\data\garages)";
+        garagesDir = GetExeDir().string() + R"(\plugins\cyber_engine_tweaks\mods\RealisticVehicleCallSystem\data\garages)";
     }
     catch (const std::exception& e) {
         RedLogger::Error("Failed to get executable directory. Cannot load garage files.");

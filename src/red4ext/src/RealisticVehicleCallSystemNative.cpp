@@ -8,12 +8,15 @@
 #include "DataStructs/Addresses.h"
 #include "DataStructs/Garage.h"
 #include "DataStructs/Globals.h"
+#include "RED4ext/Scripting/Natives/physicsTraceResult.hpp"
+#include "RED4ext/Scripting/Natives/Generated/WorldTransform.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/SimpleScreenMessage.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/TransactionSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/VehicleSystem.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/bb/AllScriptDefinitions.hpp"
 #include "RED4ext/Scripting/Natives/Generated/game/data/VehicleType.hpp"
 #include "RED4ext/Scripting/Natives/Generated/physics/GeometryCache.hpp"
+#include "RED4ext/Scripting/Natives/Generated/physics/QueryFilter.hpp"
 
 namespace RealisticVehicleCallSystem
 {
@@ -83,17 +86,28 @@ void RealisticVehicleCallSystemNative::Hook()
 }
 char __fastcall RealisticVehicleCallSystemNative::hkFindSpawnLocation(RED4ext::gameVehicleSystem* vehicleSystem, RED4ext::Vector3* playerPosition, RED4ext::Vector3* outPosition, RED4ext::Quaternion* playerAndOutRotation)
 {
-    char oResult = oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
+    RedLogger::Info("Calling RealisticVehicleCallSystemNative::hkPreFindSpawnLocation");
 
-    RedLogger::Info("Finished calling original findSpawnLocation method, setup variables for own method");
+    RED4ext::WorldTransform outTransform;
+    RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "hkPreFindSpawnLocation", &outTransform, playerPosition, outPosition, playerAndOutRotation);
 
-    if (!FindDeliveryPosition(playerPosition, currentVehicleType, currentVehicleID, outPosition, playerAndOutRotation))
-    {
-        RedLogger::Info("Finished FindDeliveryPosition with result false");
-        return oResult;
-    }
+    auto pos = outTransform.Position.AsVector3();
+    auto rot = outTransform.Orientation;
 
-    RedLogger::Info("Finished FindDeliveryPosition with result true");
+    RedLogger::Info("Finished calling RealisticVehicleCallSystemNative::hkPreFindSpawnLocation");
+
+    if (pos.X == 0 && pos.Y == 0 && pos.Z == 0 &&
+        rot.i == 0 && rot.j == 0 && rot.k == 0 && rot.r == 1)
+        return oFindSpawnLocation(vehicleSystem, playerPosition, outPosition, playerAndOutRotation);
+
+    outPosition->X = pos.X;
+    outPosition->Y = pos.Y;
+    outPosition->Z = pos.Z;
+
+    playerAndOutRotation->i = rot.i;
+    playerAndOutRotation->j = rot.j;
+    playerAndOutRotation->k = rot.k;
+    playerAndOutRotation->r = rot.r;
 
     return 1;
 }
@@ -104,54 +118,19 @@ bool RealisticVehicleCallSystemNative::hkSpawnPlayerVehicle(RED4ext::gameVehicle
     currentVehicleID = vehicleID;
     spawnedCurrentVehicle = false;
 
+    RedLogger::Info("Calling RealisticVehicleCallSystemNative::hkPreSpawnPlayerVehicle");
+
+    RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "hkPreSpawnPlayerVehicle", nullptr, vehicleType, vehicleID, spawnOnlyOnValidRoad);
+
+    RedLogger::Info("Finished calling RealisticVehicleCallSystemNative::hkPreSpawnPlayerVehicle");
+
     bool result = oSpawnPlayerVehicle(vehicleSystem, vehicleType, vehicleID, spawnOnlyOnValidRoad);
 
-    RedLogger::Info("[SpawnPlayerVehicle] result={}\nvehicleType: {}\nvehicleID: {}\nspawnOnlyOnValidRoad: {}", result, ToString(vehicleType), vehicleID.name.hash, spawnOnlyOnValidRoad);
+    RedLogger::Info("Calling RealisticVehicleCallSystemNative::hkPostSpawnPlayerVehicle");
 
-    auto tdb = RED4ext::TweakDB::Get();
+    RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "hkPostSpawnPlayerVehicle", nullptr, vehicleType, vehicleID, spawnOnlyOnValidRoad);
 
-    auto displayNameFlatName =  std::to_string(vehicleID.name.hash) + ".displayName";
-    auto displayNameFlatId = RecordHashFlatNameIDMap.find(displayNameFlatName);
-
-    if (displayNameFlatId == RecordHashFlatNameIDMap.end())
-    {
-        RedLogger::Warning("Could not find flat for {}", displayNameFlatName);
-        return result;
-    }
-
-    auto displayNameFlat = tdb->GetFlatValue(displayNameFlatId->second);
-    auto locKey = displayNameFlat->GetValue<RED4ext::gamedataLocKeyWrapper>();
-    RED4ext::CString locText;
-    RED4ext::ExecuteGlobalFunction("GetLocalizedTextByKey", &locText, locKey->primaryKey);
-
-    if (spawnedCurrentVehicle)
-    {
-        TransactMoney(-1000);
-
-        RED4ext::CString logMessage = "Vehicle Delivery";
-        RED4ext::ExecuteFunction("gameActivityLogSystem", "AddLog", nullptr, logMessage);
-
-
-        RED4ext::SimpleScreenMessage message = { };
-        message.isShown = true;
-        message.duration = 5.0f;
-        message.isInstant = true;
-        message.message = std::format("Delivered {} to {}", locText.c_str(), lastDeliveredGarageName);
-        message.type = RED4ext::SimpleMessageType::Neutral;
-
-        RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
-    }
-    else
-    {
-        RED4ext::SimpleScreenMessage message = { };
-        message.isShown = true;
-        message.duration = 5.0f;
-        message.isInstant = true;
-        message.message = std::string(locText.c_str()) + " is nearby";
-        message.type = RED4ext::SimpleMessageType::Neutral;
-
-        RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "ShowSimpleScreenMessage", nullptr, message);
-    }
+    RedLogger::Info("Finished calling RealisticVehicleCallSystemNative::hkPostSpawnPlayerVehicle");
 
     return result;
 }
@@ -168,8 +147,66 @@ RED4ext::TweakDBID* RealisticVehicleCallSystemNative::hkTweakDBIdCtorDerive(RED4
 uint64_t RealisticVehicleCallSystemNative::hkSummonVehicle(long long param_1, uint32_t *param_2, uint64_t param_3,
                                                             uint64_t param_4, uint64_t param_5, char param_6, uint8_t  param_7, uint32_t param_8, uint8_t  param_9, void*    param_10)
 {
-    spawnedCurrentVehicle = true;
+    RedLogger::Info("Calling RealisticVehicleCallSystemNative::hkPreSummonVehicle");
+
+    RED4ext::ExecuteFunction("RealisticVehicleCallSystemNative", "hkPreSummonVehicle", nullptr);
+
+    RedLogger::Info("Finished calling RealisticVehicleCallSystemNative::hkPreSummonVehicle");
+
     return oSummonVehicle(param_1, param_2, param_3, param_4, param_5, param_6, param_7, param_8, param_9, param_10);
+}
+
+void RealisticVehicleCallSystemNative::hkPreSpawnPlayerVehicleRTTI(RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4)
+{
+    RED4ext::gamedataVehicleType vehicleType;
+    RED4ext::TweakDBID vehicleID;
+    bool spawnOnlyOnValidRoad;
+
+    RED4ext::GetParameter(aFrame, &vehicleType);
+    RED4ext::GetParameter(aFrame, &vehicleID);
+    RED4ext::GetParameter(aFrame, &spawnOnlyOnValidRoad);
+
+    aFrame->code++;
+}
+
+void RealisticVehicleCallSystemNative::hkPreFindSpawnLocationRTTI(RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame, RED4ext::WorldTransform *aOut, int64_t a4)
+{
+    RED4ext::Vector3 playerPosition;
+    RED4ext::Vector3 outPosition;
+    RED4ext::Quaternion playerAndOutRotation;
+
+    RED4ext::GetParameter(aFrame, &playerPosition);
+    RED4ext::GetParameter(aFrame, &outPosition);
+    RED4ext::GetParameter(aFrame, &playerAndOutRotation);
+
+    aFrame->code++;
+
+    if (aOut)
+    {
+        *aOut = RED4ext::WorldTransform();
+    }
+}
+
+void RealisticVehicleCallSystemNative::hkPreSummonVehicleRTTI(RED4ext::IScriptable *aContext, RED4ext::CStackFrame *aFrame,
+    RED4ext::CString *aOut, int64_t a4)
+{
+    aFrame->code++;
+}
+
+void RealisticVehicleCallSystemNative::hkPostSpawnPlayerVehicleRTTI(RED4ext::IScriptable *aContext,
+    RED4ext::CStackFrame *aFrame, RED4ext::CString *aOut, int64_t a4)
+{
+    RED4ext::gamedataVehicleType vehicleType;
+    RED4ext::TweakDBID vehicleID;
+    bool spawnOnlyOnValidRoad;
+
+    RED4ext::GetParameter(aFrame, &vehicleType);
+    RED4ext::GetParameter(aFrame, &vehicleID);
+    RED4ext::GetParameter(aFrame, &spawnOnlyOnValidRoad);
+
+    aFrame->code++;
 }
 
 // based on CETs AddItemToInventory under MIT
@@ -221,7 +258,7 @@ bool SlotSupports(const RealisticVehicleSystem::Slot& slot, const RED4ext::gamed
     return true;
 }
 
-bool IsGarageBought(RealisticVehicleSystem::Garage garage)
+bool IsGarageBought(const RealisticVehicleSystem::Garage& garage)
 {
     if (garage.QuestFact.empty())
         return true;
@@ -233,6 +270,61 @@ bool IsGarageBought(RealisticVehicleSystem::Garage garage)
     RedLogger::Info("checked quest fact using questQuestsSystem.GetFactStr() with CString: {} (original string: {}) result is {}", questFactCString.c_str(), garage.QuestFact, result);
 
     return result == 1;
+}
+// 16 is the "Vehicle" group
+RED4ext::physicsQueryFilter VehicleQuery { 0, 16 };
+
+RED4ext::Handle<RED4ext::entEntity>* GetVehicleInSlot(const RealisticVehicleSystem::Slot& slot)
+{
+    RED4ext::Vector4 start = slot.Position + RED4ext::Vector3(0.0f, 0.0f, 0.1f);
+    RED4ext::Vector4 end = start + RED4ext::Vector3(0.0f, 0.0f, 2.0f);
+    RED4ext::physics::TraceResult result;
+    bool staticOnly = false;
+    bool dynamicOnly = false;
+
+    bool hit;
+    RED4ext::ExecuteFunction(
+        "gameSpatialQueriesSystem",
+        "SyncRaycastByQueryFilter",
+        &hit,
+        start,
+        end,
+        VehicleQuery,
+        result,
+        staticOnly,
+        dynamicOnly);
+
+    if (!hit)
+    {
+        RedLogger::Info("No vehicle found in slot at position {} {} {}", slot.Position.X, slot.Position.Y, slot.Position.Z);
+        return nullptr;
+    }
+
+    RedLogger::Info("Found vehicle in slot at position {} {} {} with ray hit at distance {}", slot.Position.X, slot.Position.Y, slot.Position.Z, result.distance);
+
+    auto* rtti = RED4ext::CRTTISystem::Get();
+    auto* cls = rtti->GetClass("physicsTraceResult");
+    auto* func = cls->GetFunction("GetHitEntity");
+
+    void* getHitEntityRes = nullptr;
+    if (!RED4ext::ExecuteFunction(&result, func, getHitEntityRes))
+    {
+        RedLogger::Info("Could not get entity from result");
+        return nullptr;
+    }
+
+    if (!getHitEntityRes)
+    {
+        RedLogger::Info("Entity is null");
+        return nullptr;
+    }
+
+    auto* entity = (RED4ext::Handle<RED4ext::entEntity>*)getHitEntityRes;
+
+    RedLogger::Info("Finished getting entity from result");
+    RedLogger::Info("entity components count: {}", entity->instance->components.size);
+
+    return nullptr;
 }
 
 bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* playerPosition,
@@ -282,8 +374,12 @@ bool RealisticVehicleCallSystemNative::FindDeliveryPosition(RED4ext::Vector3* pl
     std::vector<RealisticVehicleSystem::Slot> matchingSlots;
 
     for (const auto& slot : closestGarage.Slots)
+    {
         if (SlotSupports(slot, vehicleType, vehicleId))
             matchingSlots.push_back(slot);
+
+        GetVehicleInSlot(slot);
+    }
 
     RedLogger::Info("{} matching slots found", matchingSlots.size());
 

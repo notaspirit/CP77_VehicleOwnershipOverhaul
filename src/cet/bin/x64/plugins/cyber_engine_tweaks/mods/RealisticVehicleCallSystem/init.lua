@@ -1,9 +1,11 @@
 local isOverlayVisible = false
 
+---@type VehicleOwnershipOverhaul
+local voo = {}
+
 registerForEvent('onInit', function()
-    ObserveAfter('RealisticVehicleCallSystemNative', 'ShowSimpleScreenMessage', function(message)
-        GameInstance.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(message), true)
-    end)
+    voo = require("services/VehicleOwnershipOverhaul").new()
+    voo:LoadGarages()
 end)
 
 registerForEvent('onOverlayOpen', function()
@@ -19,11 +21,8 @@ registerForEvent('onDraw', function()
 
     ImGui.Begin("Realistic Vehicle Call System")
 
-    if (ImGui.Button("Set spawn position")) then
-        local pos = GetPlayer():GetWorldPosition()
-        local rot = GetPlayer():GetWorldOrientation()
-
-        RealisticVehicleCallSystemNative.SetSpawnPoint(pos, rot)
+    if (ImGui.Button("Load Garages")) then
+        voo:LoadGarages()
     end
 
     ImGui.End()
