@@ -8,7 +8,8 @@
 ---@field public isString fun(t: any): boolean
 ---@field public GetVehicleTypeEnumFromString fun(vehicleType: string): integer?
 ---@field public AddVec3 fun(a: Vector3 | Vector4, b: Vector3 | Vector4): Vector3
----@field public DivideVec3 fun(a: Vector3, scalar: number): Vector3
+---@field public DivideVec3 fun(a: Vector3 | Vector4, scalar: number): Vector3
+---@field public MultiplyVec3 fun(a: Vector3 | Vector4, scalar: number | Vector3 | Vector4): Vector3
 ---@field public Vec3ToVec4 fun(a: Vector3): Vector4
 ---@field public BuildDefaultSimpleMessage fun(): SimpleScreenMessage
 ---@field public Distance fun(a: Vector3 | Vector4, b: Vector3 | Vector4): number
@@ -116,6 +117,13 @@ end
 
 function Utils.DivideVec3(a, scalar)
     return Vector3.new(a.x / scalar, a.y / scalar, a.z / scalar)
+end
+
+function Utils.MultiplyVec3(a, scalar)
+    if type(scalar) == "number" then
+        return Vector3.new(a.x * scalar, a.y * scalar, a.z * scalar)
+    end
+    return Vector3.new(a.x * scalar.x, a.y * scalar.y, a.z * scalar.z)
 end
 
 function Utils.Vec3ToVec4(a)

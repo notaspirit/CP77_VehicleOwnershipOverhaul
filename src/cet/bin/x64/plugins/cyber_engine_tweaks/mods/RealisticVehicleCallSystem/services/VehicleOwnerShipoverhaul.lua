@@ -11,7 +11,7 @@ local ReturnValue = require("models/return_value")
 ---@field public currentVehicleID TweakDBID
 ---@field public currentVehicleSpawned boolean
 ---@field public currentDeliveredGarageName string
----@field public currentOccupyingVehicle vehicleCarBaseObject
+---@field public currentOccupyingVehicles table<vehicleCarBaseObject, true>
 ---@field public new fun(): VehicleOwnershipOverhaul
 ---@field public LoadGarages fun(self: VehicleOwnershipOverhaul): void
 ---@field private PreSpawnPlayerVehicleNativeHook fun(self: VehicleOwnershipOverhaul, vehicleType: gamedataVehicleType, vehicleId: TweakDBID, spawnOnlyOnValidRoad: boolean): void
@@ -20,8 +20,8 @@ local ReturnValue = require("models/return_value")
 ---@field private PreSummonVehicleNativeHook fun(self: VehicleOwnershipOverhaul): void
 ---@field private IsGarageBought fun(garage: Garage): boolean
 ---@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
----@field private CheckSlotOccupancy fun(slot: GarageSlot): entEntity | nil
----@field private DespawnOccupyingEntity fun(self: VehicleOwnershipOverhaul): void
+---@field private CheckSlotOccupancy fun(slot: GarageSlot): table<vehicleCarBaseObject, true> | nil
+---@field private DespawnOccupyingVehicles fun(self: VehicleOwnershipOverhaul): void
 local VehicleOwnershipOverhaul = {}
 
 VehicleOwnershipOverhaul.__index = VehicleOwnershipOverhaul
@@ -98,7 +98,7 @@ function VehicleOwnershipOverhaul:PostSpawnPlayerVehicleNativeHook(vehicleType, 
     
     if (self.currentVehicleSpawned) then
         -- works even though it is technically after the native method has completed
-        self:DespawnOccupyingEntity()
+        self:DespawnOccupyingVehicles()
 
         Game.AddToInventory("Items.money", -1000)
         local als = Game.GetActivityLogSystem()
@@ -113,7 +113,7 @@ function VehicleOwnershipOverhaul:PostSpawnPlayerVehicleNativeHook(vehicleType, 
         GameInstance.GetBlackboardSystem():Get(GetAllBlackboardDefs().UI_Notifications):SetVariant(GetAllBlackboardDefs().UI_Notifications.WarningMessage, ToVariant(msg), true)
     end
 
-    self.currentOccupyingVehicle = nil
+    self.currentOccupyingVehicles = nil
     self.currentVehicleSpawned = nil
     self.currentVehicleType = nil
     self.currentVehicleId = nil
@@ -196,7 +196,7 @@ function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition,
     end
 
     if randomSlot == nil then
-        self.currentOccupyingVehicle = slotEntityLookup[1]
+        self.currentOccupyingVehicles = slotEntityLookup[1]
         randomSlot = matchingSlots[1]
     end
     
@@ -242,32 +242,60 @@ function VehicleOwnershipOverhaul.GarageOrSlotSupports(garageOrSlot, vehicleType
 end
 
 function VehicleOwnershipOverhaul.CheckSlotOccupancy(slot)
-    local startV = utils.Vec3ToVec4(utils.AddVec3(slot.position, Vector3.new(0, 0, 0.2)))
-    local endV = utils.Vec3ToVec4(utils.AddVec3(startV, Vector3.new(0, 0, 2)))
     local query = physicsQueryFilter.AddGroup("Vehicle")
+    local entities = {}
 
-    local hit, traceResult = GameInstance.GetSpatialQueriesSystem():SyncRaycastByQueryFilter(startV, endV, query, false, false);
+    local startZ = slot.position.z + 0.2
+    local endZ = startZ + 2
 
-    if not hit then
+    local gridSizeX = 3
+    local gridSizeY = 6
+    local stepSize = 0.5
+
+    local gridStepsX = gridSizeX / stepSize
+    local gridStepsY = gridSizeY / stepSize
+
+    local right = slot.rotation:GetRight()
+    local forward = slot.rotation:GetForward()
+
+    local gridOriginLow = utils.AddVec3(slot.position,
+        utils.AddVec3(
+            utils.MultiplyVec3(right, -(gridSizeX / 2)),
+            utils.MultiplyVec3(forward, -(gridSizeY / 2))
+        ))
+    gridOriginLow.z = startZ
+
+    for i = 0, gridStepsX do
+        for j = 0, gridStepsY do
+            local rayStart = utils.AddVec3(gridOriginLow,
+                utils.AddVec3(
+                    utils.MultiplyVec3(right, i * stepSize),
+                    utils.MultiplyVec3(forward, j * stepSize)
+                ))
+            local rayEnd = Vector3.new(rayStart.x, rayStart.y, endZ)
+            
+            local hit, traceResult = GameInstance.GetSpatialQueriesSystem():SyncRaycastByQueryFilter(utils.Vec3ToVec4(rayStart), utils.Vec3ToVec4(rayEnd), query, false, false);
+
+            if hit then
+                entities[traceResult:GetHitEntity()] = true
+            end
+        end
+    end
+    if next(entities) == nil then
         return nil
     end
-
-    return traceResult:GetHitEntity()
+    return entities
 end
 
-function VehicleOwnershipOverhaul:DespawnOccupyingEntity()
-    local veh = self.currentOccupyingVehicle
-
-    if veh == nil then
-        return
-    end
-
-    if veh:IsPlayerVehicle() then
-        ---@type vehicleGarageVehicleID
-        local vehGarageId =  GarageVehicleID.Resolve(TDBID.ToStringDEBUG(veh:GetRecordID()))
-        Game.GetVehicleSystem():DespawnPlayerVehicle(vehGarageId)
-    else
-        veh:Dispose()
+function VehicleOwnershipOverhaul:DespawnOccupyingVehicles()
+    for veh, _ in pairs(self.currentOccupyingVehicles or {}) do
+        if veh:IsPlayerVehicle() then
+            ---@type vehicleGarageVehicleID
+            local vehGarageId =  GarageVehicleID.Resolve(TDBID.ToStringDEBUG(veh:GetRecordID()))
+            Game.GetVehicleSystem():DespawnPlayerVehicle(vehGarageId)
+        else
+            veh:Dispose()
+        end
     end
 end
 
