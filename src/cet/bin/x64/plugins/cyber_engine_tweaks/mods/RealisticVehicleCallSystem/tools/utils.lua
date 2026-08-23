@@ -11,7 +11,7 @@
 ---@field public DivideVec3 fun(a: Vector3, scalar: number): Vector3
 ---@field public Vec3ToVec4 fun(a: Vector3): Vector4
 ---@field public BuildDefaultSimpleMessage fun(): SimpleScreenMessage
----@field public Distance fun(a: Vector3, b: Vector3): number
+---@field public Distance fun(a: Vector3|Vector4, b: Vector3|Vector4): number
 ---@field public ListFilesInDir fun(directory: string, ext: string): table<string>
 local Utils = {}
 

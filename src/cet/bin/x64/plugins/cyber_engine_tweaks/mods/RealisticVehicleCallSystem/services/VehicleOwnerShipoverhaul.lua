@@ -18,7 +18,7 @@ local ReturnValue = require("models/return_value")
 ---@field private PreFindSpawnLocationNativeHook fun(self: VehicleOwnershipOverhaul, playerPosition: Vector3, outPosition: Vector3, playerAndOutRotation: Quaternion): WorldTransform
 ---@field private PreSummonVehicleNativeHook fun(self: VehicleOwnershipOverhaul): void
 ---@field private IsGarageBought fun(garage: Garage): boolean
----@field private GarageSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
+---@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
 local VehicleOwnershipOverhaul = {}
 
 VehicleOwnershipOverhaul.__index = VehicleOwnershipOverhaul
@@ -133,7 +133,7 @@ function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition,
             goto continue
         end
 
-        if not self.GarageSupports(garage, self.currentVehicleType, self.currentVehicleID) then
+        if not self.GarageOrSlotSupports(garage, self.currentVehicleType, self.currentVehicleID) then
             print("garage doesn't support type or vehicle")
             goto continue
         end
@@ -157,7 +157,7 @@ function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition,
     local matchingSlots = {}
 
     for _, slot in ipairs(closestGarage.slots) do
-        if self.GarageSupports(slot, self.currentVehicleType, self.currentVehicleID) then
+        if self.GarageOrSlotSupports(slot, self.currentVehicleType, self.currentVehicleID) then
             table.insert(matchingSlots, slot)
         end
     end
@@ -193,18 +193,18 @@ function VehicleOwnershipOverhaul.IsGarageBought(garage)
     return Game.GetQuestsSystem():GetFactStr(garage.questFact) == 1
 end
 
-function VehicleOwnershipOverhaul.GarageSupports(garage, vehicleType, vehicleId)
-    if not garage.vehicleTypes or not garage.vehicleTypes[vehicleType] then
+function VehicleOwnershipOverhaul.GarageOrSlotSupports(garageOrSlot, vehicleType, vehicleId)
+    if not garageOrSlot.vehicleTypes or not garageOrSlot.vehicleTypes[vehicleType] then
         return false
     end
 
-    local whiteListedVehicles = garage.whiteListedVehicles or {}
+    local whiteListedVehicles = garageOrSlot.whiteListedVehicles or {}
     if next(whiteListedVehicles) ~= nil
         and not whiteListedVehicles[vehicleId] then
         return false
     end
 
-    local blackListedVehicles = garage.blackListedVehicles or {}
+    local blackListedVehicles = garageOrSlot.blackListedVehicles or {}
     if blackListedVehicles[vehicleId] then
         return false
     end
