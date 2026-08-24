@@ -1,0 +1,63 @@
+{
+    "Name": "Northside Motel",
+    "QuestFact": "dlc6_apart_wat_nid_purchased",
+    "Slots" : [
+        {
+            "Position": {
+                "Z": 18.2,
+                "X": -1497.2127685547,
+                "Y": 2218.40234375
+            },
+            "VehicleTypes": [
+                "Car",
+                "Bike"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker",
+                "Vehicle.oranje3_panam_warmonster"
+            ],
+            "Rotation": {
+                "J": 0.00054676033323631,
+                "K": 0.95332956314087,
+                "R": -0.30193135142326,
+                "I": -0.00017575622769073
+            }
+        },
+        {
+            "VehicleTypes": [
+                "Car",
+                "Bike"
+            ],
+            "Position": {
+                "Z": 18.2,
+                "X": -1500.0988769531,
+                "Y": 2215.7919921875
+            },
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Rotation": {
+                "J": -0.0019262792775407,
+                "K": -0.94917500019073,
+                "R": 0.31474241614342,
+                "I": 0.0006373287178576
+            },
+            "WhiteListedVehicles": []
+        }
+    ]
+}

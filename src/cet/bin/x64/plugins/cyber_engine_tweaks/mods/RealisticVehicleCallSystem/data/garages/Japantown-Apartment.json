@@ -1,0 +1,51 @@
+{
+    "Name": "Japantown Apartment",
+    "QuestFact": "dlc6_apart_wbr_jpn_purchased",
+    "Slots" : [
+        {
+            "VehicleTypes": [
+                "Car"
+            ],
+            "Position": {
+                "Z": 12.315777587891,
+                "X": -777.87365722656,
+                "Y": 998.26458740234
+            },
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Rotation": {
+                "J": 0.0019811077509075,
+                "K": 0.98520565032959,
+                "R": -0.1713647544384,
+                "I": -0.0003438426356297
+            },
+            "WhiteListedVehicles": []
+        },
+        {
+            "VehicleTypes": [
+                "Bike"
+            ],
+            "Position": {
+                "Z": 12.431854248047,
+                "X": -782.52172851563,
+                "Y": 993.71081542969
+            },
+            "BlackListedVehicles": [],
+            "Rotation": {
+                "J": 0.012026601471007,
+                "K": 0.62468898296356,
+                "R": 0.78000736236572,
+                "I": -0.034750681370497
+            },
+            "WhiteListedVehicles": []
+        }
+    ]
+}

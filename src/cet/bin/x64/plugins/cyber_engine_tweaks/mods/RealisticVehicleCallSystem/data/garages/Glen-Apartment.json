@@ -1,0 +1,96 @@
+{
+    "Name": "Glen Apartment",
+    "QuestFact": "dlc6_apart_hey_gle_purchased",
+    "Slots" : [
+        {
+            "Rotation": {
+                "R": 0.7162036895752,
+                "I": 0.00096168334130198,
+                "J": -0.0063077956438065,
+                "K": -0.69786220788956
+            },
+            "VehicleTypes": [
+                "Car"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Position": {
+                "X": -1465.28515625,
+                "Y": -1010.3896484375,
+                "Z": 9.0430908203125
+            }
+        },
+        {
+            "Rotation": {
+                "R": -0.71630573272705,
+                "I": -0.0016496633179486,
+                "J": 0.0015964127378538,
+                "K": 0.69778281450272
+            },
+            "VehicleTypes": [
+                "Car"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Position": {
+                "X": -1454.2761230469,
+                "Y": -1009.6016845703,
+                "Z": 9.0685272216797
+            }
+        },
+        {
+            "Rotation": {
+                "R": 0.97772616147995,
+                "I": -0.020080279558897,
+                "J": 0.017732730135322,
+                "K": -0.20816810429096
+            },
+            "VehicleTypes": [
+                "Bike"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [],
+            "Position": {
+                "X": -1442.265625,
+                "Y": -1009.5357666016,
+                "Z": 9.542030334473
+            }
+        },
+        {
+            "Rotation": {
+                "R": 0.98091667890549,
+                "I": -0.0094533320516348,
+                "J": 0.015475624240935,
+                "K": -0.19358098506927
+            },
+            "VehicleTypes": [
+                "Bike"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [],
+            "Position": {
+                "X": -1443.8876953125,
+                "Y": -1009.5098266602,
+                "Z": 9.3689880371094
+            }
+        }
+    ]
+}

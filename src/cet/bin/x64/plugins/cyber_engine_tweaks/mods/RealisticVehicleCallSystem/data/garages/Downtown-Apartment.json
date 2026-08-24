@@ -1,0 +1,79 @@
+{
+    "Name": "Downtown Apartment",
+    "QuestFact": "dlc6_apart_cct_dtn_purchased",
+    "Slots" : [
+        {
+            "Rotation": {
+                "R": 0.0198566429317,
+                "I": 0.0023393300361931,
+                "J": -0.00049665407277644,
+                "K": -0.99979996681213
+            },
+            "VehicleTypes": [
+                "Car"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Position": {
+                "X": -1609.1312255859,
+                "Y": 352.32165527344,
+                "Z": 8
+            }
+        },
+        {
+            "Rotation": {
+                "R": 0.67771148681641,
+                "I": 0.0037621092051268,
+                "J": -0.020209766924381,
+                "K": 0.73504060506821
+            },
+            "VehicleTypes": [
+                "Bike"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [],
+            "Position": {
+                "X": -1604.3388671875,
+                "Y": 346.85217285156,
+                "Z": 8
+            }
+        },
+        {
+            "Rotation": {
+                "R": 0.21148696541786,
+                "I": 0.001472526229918,
+                "J": 0.0047378283925354,
+                "K": -0.97736823558807
+            },
+            "VehicleTypes": [
+                "Car",
+                "Bike"
+            ],
+            "WhiteListedVehicles": [],
+            "BlackListedVehicles": [
+                "Vehicle.cs_savable_mahir_mt28_coach_dab",
+                "Vehicle.oranje3_table_top_oranje",
+                "Vehicle.oranje3_table_top_oranje_container",
+                "Vehicle.oranje3_table_top_oranje_container_frame",
+                "Vehicle.oranje3_table_top_oranje_hauler",
+                "Vehicle.oranje3_table_top_oranje_hauler_empty",
+                "Vehicle.oranje3_table_top_oranje_mixer",
+                "Vehicle.oranje3_table_top_oranje_tanker"
+            ],
+            "Position": {
+                "X": -1614.4682617188,
+                "Y": 353.61517333984,
+                "Z": 8
+            }
+        }
+    ]
+}
