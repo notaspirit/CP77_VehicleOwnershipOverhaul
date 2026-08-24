@@ -3,6 +3,7 @@ local logger = require("libs/logger")
 local json = require("libs/json")
 
 local garage = require("models/garage")
+local gridConfig = require("models/grid_config")
 local ReturnValue = require("models/return_value")
 
 ---@class VehicleOwnershipOverhaul
@@ -20,7 +21,7 @@ local ReturnValue = require("models/return_value")
 ---@field private PreSummonVehicleNativeHook fun(self: VehicleOwnershipOverhaul): void
 ---@field private IsGarageBought fun(garage: Garage): boolean
 ---@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
----@field private CheckSlotOccupancy fun(slot: GarageSlot): table<vehicleCarBaseObject, true> | nil
+---@field private CheckSlotOccupancy fun(slot: GarageSlot, vehType: number): table<vehicleCarBaseObject, true> | nil
 ---@field private DespawnOccupyingVehicles fun(self: VehicleOwnershipOverhaul): void
 local VehicleOwnershipOverhaul = {}
 
@@ -186,7 +187,7 @@ function VehicleOwnershipOverhaul:PreFindSpawnLocationNativeHook(playerPosition,
     local slotEntityLookup = {}
 
     for i, slot in ipairs(matchingSlots) do
-        local occupiedEnt = self.CheckSlotOccupancy(slot)
+        local occupiedEnt = self.CheckSlotOccupancy(slot, self.currentVehicleType)
         if occupiedEnt == nil then
             randomSlot = slot
             break
@@ -241,36 +242,36 @@ function VehicleOwnershipOverhaul.GarageOrSlotSupports(garageOrSlot, vehicleType
     return true
 end
 
-function VehicleOwnershipOverhaul.CheckSlotOccupancy(slot)
+function VehicleOwnershipOverhaul.CheckSlotOccupancy(slot, vehType)
     local query = physicsQueryFilter.AddGroup("Vehicle")
     local entities = {}
 
     local startZ = slot.position.z + 0.2
     local endZ = startZ + 2
 
-    local gridSizeX = 3
-    local gridSizeY = 6
-    local stepSize = 0.5
-
-    local gridStepsX = gridSizeX / stepSize
-    local gridStepsY = gridSizeY / stepSize
+    local gc = gridConfig.FromVehicleType(vehType)
+    print(vehType)
+    if gc == nil then
+        gc = gridConfig.FromVehicleType(1)
+        ---@cast gc -nil
+    end
 
     local right = slot.rotation:GetRight()
     local forward = slot.rotation:GetForward()
 
     local gridOriginLow = utils.AddVec3(slot.position,
         utils.AddVec3(
-            utils.MultiplyVec3(right, -(gridSizeX / 2)),
-            utils.MultiplyVec3(forward, -(gridSizeY / 2))
+            utils.MultiplyVec3(right, -(gc.width / 2)),
+            utils.MultiplyVec3(forward, -(gc.length / 2))
         ))
     gridOriginLow.z = startZ
 
-    for i = 0, gridStepsX do
-        for j = 0, gridStepsY do
+    for i = 0, gc.widthSteps do
+        for j = 0, gc.lengthSteps do
             local rayStart = utils.AddVec3(gridOriginLow,
                 utils.AddVec3(
-                    utils.MultiplyVec3(right, i * stepSize),
-                    utils.MultiplyVec3(forward, j * stepSize)
+                    utils.MultiplyVec3(right, i * gc.stepSize),
+                    utils.MultiplyVec3(forward, j * gc.stepSize)
                 ))
             local rayEnd = Vector3.new(rayStart.x, rayStart.y, endZ)
             
@@ -281,6 +282,19 @@ function VehicleOwnershipOverhaul.CheckSlotOccupancy(slot)
             end
         end
     end
+
+    local centerLow = utils.Vec3ToVec4(slot.position)
+    centerLow.z = startZ
+
+    local centerHigh = Vector4.new(centerLow)
+    centerHigh.z = endZ
+
+    local hit, traceResult = GameInstance.GetSpatialQueriesSystem():SyncRaycastByQueryFilter(centerLow, centerHigh, query, false, false);
+
+    if hit then
+        entities[traceResult:GetHitEntity()] = true
+    end
+
     if next(entities) == nil then
         return nil
     end
