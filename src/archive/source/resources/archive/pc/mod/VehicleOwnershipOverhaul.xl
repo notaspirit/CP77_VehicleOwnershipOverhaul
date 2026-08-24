@@ -1,0 +1,412 @@
+streaming:
+    sectors:
+        - expectedNodes: 668
+          nodeDeletions:
+              - position:
+                    x: -1597.5749511719
+                    y: 339.95462036133
+                    z: 8.2972869873047
+                type: worldStaticMeshNode
+                debugName: e_hologram_screens
+                orientation:
+                    r: -0.64684003591537
+                    i: 0.26792976260185
+                    k: 0.65966022014618
+                    j: -0.27324000000954
+                index: 307
+                nodeRef: ""
+                resource: base\fx\environment\holograms\screens\e_hologram_screens.mesh
+              - position:
+                    x: -1597.7971191406
+                    y: 339.95959472656
+                    z: 8.0621948242188
+                type: worldStaticMeshNode
+                debugName: int_mlt_jp_arasaka_a_netrunners_ditch_a_terminal_addon_a
+                orientation:
+                    r: -0.99995189905167
+                    i: 0
+                    k: 0.0098120560869575
+                    j: 0
+                index: 365
+                nodeRef: ""
+                resource: base\environment\architecture\common\int\int_mlt_jp_arasaka_a\int_mlt_jp_arasaka_a_netrunners_ditch_a_terminal_addon_a.mesh
+              - position:
+                    x: -1598.9429931641
+                    y: 339.56536865234
+                    z: 8.4560928344727
+                type: worldInstancedMeshNode
+                debugName: ""
+                orientation:
+                    r: 0.70013421773911
+                    i: 0
+                    k: -0.71401125192642
+                    j: 0
+                index: 582
+                nodeRef: ""
+                resource: base\environment\architecture\common\int\int_common_a\int_common_a_floor_glass_under_beam_l200_a.mesh
+              - position:
+                    x: -1598.7028808594
+                    y: 340.70129394531
+                    z: 8.2777147293091
+                type: worldStaticMeshNode
+                debugName: cable_connector_a_big_006
+                orientation:
+                    r: -0.62802231311798
+                    i: -0.62802231311798
+                    k: 0.3249431848526
+                    j: 0.3249431848526
+                index: 315
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\cable\cable_connector\cable_connector_a_big.mesh
+              - position:
+                    x: -1598.7574462891
+                    y: 340.55947875977
+                    z: 8.2296752929688
+                type: worldInstancedMeshNode
+                debugName: ""
+                orientation:
+                    r: -0.29133287072182
+                    i: 0
+                    k: 0.95662182569504
+                    j: 0
+                index: 576
+                nodeRef: ""
+                resource: base\environment\vegetation\jungle\morus\terr_morus_short.mesh
+              - position:
+                    x: -1598.8435058594
+                    y: 340.76751708984
+                    z: 8.3449172973633
+                type: worldStaticMeshNode
+                debugName: lawn_squ_3m_001
+                orientation:
+                    r: -0.70013433694839
+                    i: 0
+                    k: 0.71401125192642
+                    j: 0
+                index: 447
+                nodeRef: ""
+                resource: base\environment\vegetation\grass\lawn\lawn_squ_3m.mesh
+              - position:
+                    x: -1599.0018310547
+                    y: 340.91946411133
+                    z: 8.0885391235352
+                type: worldInstancedMeshNode
+                debugName: ""
+                orientation:
+                    r: -6.242078853802e-8
+                    i: -0.70013457536697
+                    k: -6.1207728663248e-8
+                    j: 0.71401089429855
+                index: 590
+                nodeRef: ""
+                resource: base\environment\architecture\common\int\int_mlt_jp_arasaka_a\int_mlt_jp_arasaka_a_wall_ledge_a_l100_c90.mesh
+              - position:
+                    x: -1598.1129150391
+                    y: 340.35296630859
+                    z: 9.4516181945801
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_h_tube
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 320
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_h_tube.mesh
+              - position:
+                    x: -1598.1588134766
+                    y: 340.17938232422
+                    z: 9.9220266342163
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_f
+                orientation:
+                    r: -0.5806622505188
+                    i: 0
+                    k: 0.814144551754
+                    j: 0
+                index: 301
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_f.mesh
+              - position:
+                    x: -1598.1416015625
+                    y: 340.41693115234
+                    z: 9.712890625
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_b
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 366
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_b.mesh
+              - position:
+                    x: -1598.337890625
+                    y: 340.24877929688
+                    z: 9.739278793335
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_c
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 392
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_c.mesh
+              - position:
+                    x: -1598.0377197266
+                    y: 340.17633056641
+                    z: 9.9247636795044
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_i_tube
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 344
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_i_tube.mesh
+              - position:
+                    x: -1598.3317871094
+                    y: 340.41918945313
+                    z: 11.288291931152
+                type: worldInstancedMeshNode
+                debugName: ""
+                orientation:
+                    r: 0.61474698781967
+                    i: -0.670878469944
+                    k: -0.28019347786903
+                    j: 0.30577746033669
+                index: 551
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_l_connector.mesh
+              - position:
+                    x: -1598.1264648438
+                    y: 340.17239379883
+                    z: 10.261492729187
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_k
+                orientation:
+                    r: -0.64941000938416
+                    i: 0
+                    k: 0.76043850183487
+                    j: 0
+                index: 358
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_k.mesh
+              - position:
+                    x: -1598.1970214844
+                    y: 340.37753295898
+                    z: 10.271450042725
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_d
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 385
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_d.mesh
+              - position:
+                    x: -1598.1817626953
+                    y: 340.35821533203
+                    z: 9.9199123382568
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_a
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 400
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_a.mesh
+              - position:
+                    x: -1598.2928466797
+                    y: 340.60134887695
+                    z: 9.7489929199219
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_j_bottle
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 329
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_j_bottle.mesh
+              - position:
+                    x: -1598.0549316406
+                    y: 340.11178588867
+                    z: 9.9229726791382
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_g_tube
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 404
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_g_tube.mesh
+              - position:
+                    x: -1598.166015625
+                    y: 340.36090087891
+                    z: 11.04403591156
+                type: worldStaticMeshNode
+                debugName: palmtree_attachment_e
+                orientation:
+                    r: -0.9099406003952
+                    i: 0
+                    k: 0.41473880410194
+                    j: 0
+                index: 423
+                nodeRef: ""
+                resource: base\environment\decoration\public_utility\fixtures\palmtree_attachment\palmtree_attachment_e.mesh
+              - position:
+                    x: -1596.6354980469
+                    y: 339.64459228516
+                    z: 8.174222946167
+                type: worldEntityNode
+                debugName: d_JJ3XXLA_004
+                orientation:
+                    r: 0.014168344438076
+                    i: 0
+                    k: 0.99989968538284
+                    j: 0
+                index: 295
+                nodeRef: $/03_night_city/#c_city_center/downtown/roads_prefabQ3P5D3A/decoration_7D5548DA_JJ3XXLA_4
+                resource: base\gameplay\devices\lighting\street\street_lamps\street_lamp_g_cc.ent
+          path: base\worlds\03_night_city\_compiled\default\exterior_-25_5_0_0.streamingsector
+          nodeMutations: []
+        - expectedNodes: 2064
+          nodeDeletions:
+              - position:
+                    x: -1596.6354980469
+                    y: 339.64459228516
+                    z: 8.174222946167
+                type: worldEntityProxyMeshNode
+                debugName: ""
+                orientation:
+                    r: 0.014168344438076
+                    i: 0
+                    k: 0.99989968538284
+                    j: 0
+                index: 309
+                nodeRef: $/03_night_city/#c_city_center/downtown/roads_prefabQ3P5D3A/decoration_7D5548DA_JJ3XXLA_4/_entityProxyMesh
+                resource: base\gameplay\devices\lighting\street\street_lamps\_proxyhelper\street_lamp_g_cc_mproxy.mesh
+              - orientation:
+                    r: 0.3443765938282
+                    i: 0
+                    k: 0.93883168697357
+                    j: 0
+                type: worldCollisionNode
+                resource: ""
+                position:
+                    x: -1598.3358154297
+                    y: 340.23699951172
+                    z: 8.213996887207
+                actorDeletions:
+                    - 0
+                debugName: NormalCollisionNode_236
+                expectedActors: 6
+                index: 2052
+                nodeRef: ""
+          path: base\worlds\03_night_city\_compiled\default\exterior_-13_2_0_1.streamingsector
+          nodeMutations: []
+        - expectedNodes: 2934
+          nodeDeletions:
+              - orientation:
+                    r: -0.70013433694839
+                    i: 0
+                    k: 0.71401125192642
+                    j: 0
+                type: worldCollisionNode
+                resource: ""
+                position:
+                    x: -1598.8435058594
+                    y: 340.76751708984
+                    z: 8.3449172973633
+                actorDeletions:
+                    - 0
+                debugName: NormalCollisionNode_235
+                expectedActors: 52
+                index: 2853
+                nodeRef: ""
+              - position:
+                    x: -1598.3358154297
+                    y: 340.23699951172
+                    z: 8.2139949798584
+                type: worldStaticMeshNode
+                debugName: fan_palm_highest
+                orientation:
+                    r: 0.3443765938282
+                    i: 0
+                    k: 0.93883168697357
+                    j: 0
+                index: 814
+                nodeRef: ""
+                resource: base\environment\vegetation\palms\fan_palm\fan_palm_highest.mesh
+          path: base\worlds\03_night_city\_compiled\default\exterior_-7_1_0_2.streamingsector
+          nodeMutations: []
+        - nodeDeletions:
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 0
+                    - 1
+                expectedActors: 64
+                index: 2040
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 0
+                expectedActors: 6
+                index: 2052
+          expectedNodes: 2064
+          path: base\worlds\03_night_city\_compiled\default\exterior_-13_2_0_1.streamingsector
+        - nodeDeletions:
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 6
+                expectedActors: 7
+                index: 660
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 5
+                    - 18
+                    - 29
+                    - 40
+                    - 41
+                    - 43
+                    - 44
+                    - 46
+                    - 59
+                    - 60
+                    - 61
+                    - 62
+                    - 63
+                expectedActors: 64
+                index: 663
+          expectedNodes: 668
+          path: base\worlds\03_night_city\_compiled\default\exterior_-25_5_0_0.streamingsector
+        - nodeDeletions:
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 0
+                    - 3
+                expectedActors: 52
+                index: 2853
+              - type: worldCollisionNode
+                actorDeletions:
+                    - 45
+                    - 46
+                    - 47
+                    - 48
+                expectedActors: 128
+                index: 2927
+          expectedNodes: 2934
+          path: base\worlds\03_night_city\_compiled\default\exterior_-7_1_0_2.streamingsector
