@@ -8,8 +8,8 @@ local garageSlot = require("models/garage_slot")
 ---@field public questFact string
 ---@field public position Vector3
 ---@field public vehicleTypes table<integer, boolean>
----@field public whiteListedVehicles table<TweakDBID, true>
----@field public blackListedVehicles table<TweakDBID, true>
+---@field public whiteListedVehicles table<string, true>
+---@field public blackListedVehicles table<string, true>
 ---@field public slots GarageSlot[]
 ---@field public new fun(): Garage
 ---@field public Deserialize fun(self: Garage, t: table, encounteredNames: table<string, boolean>): ReturnValue
@@ -63,6 +63,7 @@ function Garage:Deserialize(t, encounteredNames)
     local totalSlotPosition = Vector3.new(0, 0, 0)
     self.whiteListedVehicles = {}
     self.blackListedVehicles = {}
+    local blackListedVehiclesByCount = {}
     self.vehicleTypes = utils.buildVehicleTypeDict()
 
     for i, slotTable in ipairs(t.Slots) do
@@ -74,12 +75,25 @@ function Garage:Deserialize(t, encounteredNames)
            table.insert(self.slots, slot)
            totalSlotPosition = utils.AddVec3(totalSlotPosition, slot.position)
            self.whiteListedVehicles = utils.MergeTables(self.whiteListedVehicles, slot.whiteListedVehicles)
-           self.blackListedVehicles = utils.MergeTables(self.blackListedVehicles, slot.blackListedVehicles)
+           for blackListedVeh, _ in pairs(slot.blackListedVehicles) do
+                local count = blackListedVehiclesByCount[blackListedVeh]
+                if count == nil then
+                    blackListedVehiclesByCount[blackListedVeh] = 1
+                else
+                    blackListedVehiclesByCount[blackListedVeh] = count + 1
+                end
+           end
            for vehType, supports in pairs(slot.vehicleTypes) do
                 if supports then
                     self.vehicleTypes[vehType] = supports
                 end
            end
+        end
+    end
+
+    for blveh, count in pairs(blackListedVehiclesByCount) do
+        if count == #self.slots then
+            self.blackListedVehicles[blveh] = true
         end
     end
 

@@ -6,8 +6,8 @@ local ReturnValue = require("models/return_value")
 
 ---@class GarageSlot
 ---@field public vehicleTypes table<integer, boolean>
----@field public whiteListedVehicles table<TweakDBID, true>
----@field public blackListedVehicles table<TweakDBID, true>
+---@field public whiteListedVehicles table<string, true>
+---@field public blackListedVehicles table<string, true>
 ---@field public position Vector3
 ---@field public rotation Quaternion
 ---@field public new fun(): GarageSlot
@@ -51,7 +51,7 @@ function GarageSlot:Deserialize(t)
     end
 
     for _, vehicle in ipairs(t.WhiteListedVehicles) do
-        self.whiteListedVehicles[TweakDBID.new(vehicle)] = true
+        self.whiteListedVehicles[vehicle] = true
     end
 
     if not utils.isStringArray(t.BlackListedVehicles) then
@@ -61,7 +61,7 @@ function GarageSlot:Deserialize(t)
     end
 
     for _, vehicle in ipairs(t.BlackListedVehicles) do
-        self.blackListedVehicles[TweakDBID.new(vehicle)] = true
+        self.blackListedVehicles[vehicle] = true
     end
 
     if not utils.isVector3(t.Position) then

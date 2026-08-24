@@ -9,7 +9,7 @@ local ReturnValue = require("models/return_value")
 ---@class VehicleOwnershipOverhaul
 ---@field public garages Garage[]
 ---@field public currentVehicleType number
----@field public currentVehicleID TweakDBID
+---@field public currentVehicleID string
 ---@field public currentVehicleSpawned boolean
 ---@field public currentDeliveredGarageName string
 ---@field public currentOccupyingVehicles table<vehicleCarBaseObject, true>
@@ -20,7 +20,7 @@ local ReturnValue = require("models/return_value")
 ---@field private PreFindSpawnLocationNativeHook fun(self: VehicleOwnershipOverhaul, playerPosition: Vector3, outPosition: Vector3, playerAndOutRotation: Quaternion): WorldTransform
 ---@field private PreSummonVehicleNativeHook fun(self: VehicleOwnershipOverhaul): void
 ---@field private IsGarageBought fun(garage: Garage): boolean
----@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: TweakDBID): boolean
+---@field private GarageOrSlotSupports fun(garage: Garage | GarageSlot, vehicleType: number, vehicleId: string): boolean
 ---@field private CheckSlotOccupancy fun(slot: GarageSlot, vehType: number): table<vehicleCarBaseObject, true> | nil
 ---@field private DespawnOccupyingVehicles fun(self: VehicleOwnershipOverhaul): void
 local VehicleOwnershipOverhaul = {}
@@ -90,12 +90,11 @@ end
 function VehicleOwnershipOverhaul:PreSpawnPlayerVehicleNativeHook(vehicleType, vehicleId, spawnOnlyOnValidRoad)
     self.currentVehicleSpawned = false
     self.currentVehicleType = tonumber(EnumInt(vehicleType))
-    self.currentVehicleID = vehicleId
+    self.currentVehicleID = TDBID.ToStringDEBUG(vehicleId)
 end
 
 function VehicleOwnershipOverhaul:PostSpawnPlayerVehicleNativeHook(vehicleType, vehicleId, spawnOnlyOnValidRoad)
-    local tdbid = TDBID.ToStringDEBUG(self.currentVehicleID)
-    local name = Game.GetLocalizedTextByKey(TDB.GetLocKey(tdbid .. ".displayName"))
+    local name = Game.GetLocalizedTextByKey(TDB.GetLocKey(self.currentVehicleID .. ".displayName"))
     
     if (self.currentVehicleSpawned) then
         -- works even though it is technically after the native method has completed
